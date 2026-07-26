@@ -3,338 +3,2610 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VaultPulse - Cybernetic Local & Web Share Engine</title>
+    <title>VaultPulse - Animated Local Share & Storage Vault</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #0a0c14;
-            --bg-card: rgba(18, 24, 38, 0.85);
-            --bg-card-hover: rgba(28, 36, 56, 0.95);
-            --border-glass: rgba(255, 255, 255, 0.12);
-            --border-glass-glow: rgba(0, 242, 254, 0.4);
-            --primary-cyan: #00f2fe;
-            --primary-blue: #4facfe;
-            --accent-purple: #7f00ff;
-            --accent-pink: #e100ff;
-            --accent-coral: #ff0844;
-            --accent-emerald: #00e676;
-            --text-main: #f0f4f8;
-            --text-muted: #94a3b8;
-            --text-dim: #64748b;
-            --shadow-glass: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            --glow-cyan: 0 0 25px rgba(0, 242, 254, 0.3);
-            --glow-purple: 0 0 25px rgba(127, 0, 255, 0.3);
-            --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+/* ==========================================================================
+   VaultPulse - Modern Cybernetic Glassmorphic Styling System (v10.0 Cyber Edition)
+   ========================================================================== */
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; min-height: 100vh; background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+:root {
+    /* Color Palette */
+    --bg-dark: #0a0c14;
+    --bg-card: rgba(18, 24, 38, 0.85);
+    --bg-card-hover: rgba(28, 36, 56, 0.95);
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --border-glass-glow: rgba(0, 242, 254, 0.4);
 
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .ambient-glow { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; opacity: 0.4; animation: floatGlow 14s infinite alternate ease-in-out; }
-        .glow-1 { width: 350px; height: 350px; background: radial-gradient(circle, var(--primary-cyan), transparent); top: -50px; left: -50px; }
-        .glow-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--accent-purple), transparent); bottom: -100px; right: -50px; animation-delay: -5s; }
-        .glow-3 { width: 250px; height: 250px; background: radial-gradient(circle, var(--accent-pink), transparent); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -9s; }
-        @keyframes floatGlow { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(20px, -20px) scale(1.1); } 100% { transform: translate(-20px, 20px) scale(0.95); } }
+    --primary-cyan: #00f2fe;
+    --primary-blue: #4facfe;
+    --accent-purple: #7f00ff;
+    --accent-pink: #e100ff;
+    --accent-coral: #ff0844;
+    --accent-emerald: #00e676;
 
-        .glass-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 20px; box-shadow: var(--shadow-glass); transition: transform var(--transition-fast), border-color var(--transition-fast); }
-        .glass-card:hover { border-color: rgba(255, 255, 255, 0.22); }
-        .app-wrapper { position: relative; z-index: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    --text-main: #f0f4f8;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
 
-        .app-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 18px 24px; gap: 16px; }
-        .brand { display: flex; align-items: center; gap: 14px; }
-        .logo-icon { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, var(--primary-cyan), var(--accent-purple)); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: var(--glow-cyan); flex-shrink: 0; }
-        .brand-text h1 { font-size: 1.35rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .version-tag { font-size: 0.65rem; font-family: var(--font-mono); padding: 2px 8px; border-radius: 20px; background: rgba(0, 242, 254, 0.15); color: var(--primary-cyan); border: 1px solid rgba(0, 242, 254, 0.3); }
-        .tagline { font-size: 0.82rem; color: var(--text-muted); }
-        .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    /* Shadows & Glows */
+    --shadow-glass: 0 16px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --glow-cyan: 0 0 25px rgba(0, 242, 254, 0.3);
+    --glow-purple: 0 0 25px rgba(127, 0, 255, 0.3);
 
-        .sync-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 30px; background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.25); font-size: 0.8rem; color: var(--accent-emerald); font-weight: 500; white-space: nowrap; }
-        .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background-color: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: pulseRing 1.8s infinite; }
-        @keyframes pulseRing { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.4; } 100% { transform: scale(0.95); opacity: 1; } }
+    /* Fonts */
+    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
-        .btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 12px; font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; outline: none; transition: all var(--transition-fast); user-select: none; white-space: nowrap; overflow: hidden; }
-        .btn-primary { background: linear-gradient(135deg, #00f2fe, #4facfe, #7f00ff); background-size: 200% 200%; color: #030914; font-weight: 700; box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); animation: gradientGlow 3s ease infinite, btnPulse 2.5s ease-in-out infinite; }
-        @keyframes gradientGlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes btnPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0, 242, 254, 0.35); } 50% { transform: scale(1.04); box-shadow: 0 0 28px rgba(0, 242, 254, 0.65); } }
-        .btn-primary::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.4), transparent); transform: rotate(30deg); animation: shimmerSweep 3.2s infinite; }
-        @keyframes shimmerSweep { 0% { transform: translateX(-100%) rotate(30deg); } 30%, 100% { transform: translateX(100%) rotate(30deg); } }
-        .btn-primary:hover { transform: translateY(-2px) scale(1.02); }
-        .btn-accent { background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); color: #fff; box-shadow: var(--glow-purple); }
-        .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid var(--border-glass); }
-        .btn-danger { background: rgba(255, 8, 68, 0.15); color: #ff4d6d; border: 1px solid rgba(255, 8, 68, 0.3); }
-        .btn-link { background: none; border: none; color: var(--primary-cyan); font-weight: 600; text-decoration: underline; cursor: pointer; }
-        .icon-btn { width: 40px; height: 40px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    /* Transitions */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-        .nav-tabs { display: flex; padding: 6px; gap: 8px; width: 100%; }
-        .nav-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 14px; border-radius: 14px; background: transparent; border: none; color: var(--text-muted); font-family: var(--font-sans); font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all var(--transition-fast); }
-        .nav-btn.active { background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(127, 0, 255, 0.15)); color: var(--primary-cyan); border: 1px solid rgba(0, 242, 254, 0.25); }
-        .tab-content { display: none; animation: fadeInTab 0.3s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeInTab { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+/* Reset & Base Settings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .dropzone-card, .text-share-card { padding: 24px; }
-        .card-header h2 { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .card-header p { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
 
-        .dropzone { border: 2px dashed rgba(0, 242, 254, 0.3); border-radius: 16px; padding: 30px 16px; text-align: center; background: rgba(0, 242, 254, 0.02); position: relative; cursor: pointer; margin-top: 16px; overflow: hidden; }
-        .upload-icon-wrapper { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); color: var(--primary-cyan); display: flex; align-items: center; justify-content: center; }
-        .drop-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
-        .drop-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; }
-        .supported-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .tag { font-size: 0.72rem; padding: 4px 10px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-glass); }
+/* Canvas Background */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
 
-        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-        .form-group label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-        .form-input, .form-textarea, .form-select, .form-select-sm { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); border-radius: 12px; padding: 10px 14px; color: var(--text-main); font-family: var(--font-sans); font-size: 0.9rem; outline: none; }
-        .form-textarea { font-family: var(--font-mono); font-size: 0.85rem; resize: vertical; }
-        .form-row { display: flex; gap: 14px; align-items: flex-end; }
-        .flex-1 { flex: 1; }
-        .w-full { width: 100%; }
+/* Ambient Glow Blobs */
+.ambient-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.4;
+    animation: floatGlow 14s infinite alternate ease-in-out;
+}
 
-        .recent-strip-card { padding: 20px 24px; }
-        .strip-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-        .strip-header h3 { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-        .strip-subtitle { font-size: 0.8rem; color: var(--text-muted); }
-        .recent-items-row { display: flex; gap: 14px; overflow-x: auto; padding: 8px 4px 14px; scrollbar-width: thin; scrollbar-color: var(--primary-cyan) transparent; }
-        .recent-items-row::-webkit-scrollbar { height: 6px; }
-        .recent-items-row::-webkit-scrollbar-thumb { background: var(--primary-cyan); border-radius: 10px; }
+.glow-1 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, var(--primary-cyan), transparent);
+    top: -50px;
+    left: -50px;
+}
 
-        .mini-item-card { width: 240px; min-width: 240px; max-width: 240px; flex-shrink: 0; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-glass); border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; overflow: hidden; }
-        .mini-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 242, 254, 0.12); color: var(--primary-cyan); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-        .mini-details { flex: 1; min-width: 0; overflow: hidden; }
-        .mini-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
-        .mini-time { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+.glow-2 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--accent-purple), transparent);
+    bottom: -100px;
+    right: -50px;
+    animation-delay: -5s;
+}
 
-        /* CYBER NEON SEARCH BAR */
-        .vault-toolbar-card { padding: 20px 24px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; }
-        .search-box-cyber { position: relative; width: 100%; display: flex; align-items: center; background: rgba(8, 12, 24, 0.9); border: 2px solid rgba(0, 242, 254, 0.55); border-radius: 40px; padding: 4px 6px 4px 18px; box-shadow: 0 0 20px rgba(0, 242, 254, 0.25), inset 0 0 10px rgba(0, 242, 254, 0.15); }
-        .search-icon-left { color: var(--primary-cyan); display: flex; align-items: center; justify-content: center; margin-right: 12px; }
-        .search-box-cyber input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; font-family: var(--font-sans); font-size: 0.95rem; padding: 8px 0; }
-        .search-action-btn { background: linear-gradient(135deg, #00f2fe, #00c6ff); color: #030a16; font-family: var(--font-sans); font-weight: 700; font-size: 0.88rem; border: none; border-radius: 30px; padding: 8px 22px; cursor: pointer; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); }
+.glow-3 {
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, var(--accent-pink), transparent);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -9s;
+}
 
-        .category-chips { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-        .chip { padding: 6px 14px; border-radius: 30px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--text-muted); font-size: 0.82rem; cursor: pointer; }
-        .chip.active { background: rgba(0, 242, 254, 0.18); border-color: var(--primary-cyan); color: var(--primary-cyan); }
-        .sort-controls { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-muted); }
+@keyframes floatGlow {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.1); }
+    100% { transform: translate(-20px, 20px) scale(0.95); }
+}
 
-        .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        .vault-card { padding: 16px; display: flex; flex-direction: column; }
-        .vault-card-thumb { height: 130px; border-radius: 12px; background: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden; }
-        .vault-card-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .vault-card-meta { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 12px; display: flex; justify-content: space-between; }
-        .vault-card-actions { display: flex; gap: 8px; margin-top: auto; }
-        .vault-card-actions button { flex: 1; padding: 6px 10px; font-size: 0.78rem; }
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    box-shadow: var(--shadow-glass);
+    transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
 
-        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 7, 12, 0.88); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-        .modal-content { width: 100%; max-width: 540px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-        .qr-modal-card { max-width: 440px; }
-        .modal-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); }
-        .modal-body { padding: 20px; overflow-y: auto; max-height: 60vh; }
-        .modal-body.align-center { display: flex; flex-direction: column; align-items: center !important; text-align: center !important; }
-        .modal-footer { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-glass); }
-        .modal-footer.justify-center { justify-content: center !important; }
-        .qr-code-box { margin: 0 auto 12px; padding: 16px; background: #ffffff; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); }
-        .qr-code-box svg, .qr-code-box img { display: block; width: 200px; height: 200px; }
-        .qr-hint { font-size: 0.82rem; color: var(--text-muted); text-align: center; margin-top: 10px; }
-        .text-center { text-align: center !important; }
-        .toast-container { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 200; pointer-events: none; }
-        .toast { pointer-events: auto; min-width: 260px; max-width: 360px; padding: 12px 16px; border-radius: 12px; background: rgba(18, 24, 38, 0.95); backdrop-filter: blur(16px); border: 1px solid var(--primary-cyan); color: var(--text-main); font-size: 0.85rem; }
-        .hidden { display: none !important; }
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+}
 
-        @media (max-width: 768px) {
-            .app-wrapper { padding: 10px; gap: 12px; }
-            .nav-tabs { display: flex !important; gap: 4px !important; padding: 4px !important; width: 100% !important; }
-            .nav-btn { flex: 1 !important; min-width: 0 !important; padding: 8px 4px !important; font-size: 0.72rem !important; gap: 4px !important; text-align: center !important; justify-content: center !important; }
-            .nav-btn span { white-space: normal !important; line-height: 1.1 !important; }
-            .app-header { flex-direction: column; align-items: center; text-align: center; padding: 14px; gap: 12px; }
-            .brand { justify-content: center; }
-            .header-controls { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; align-items: center !important; width: 100% !important; gap: 6px !important; }
-            .phone-connect-btn { display: inline-flex !important; font-size: 0.75rem !important; padding: 6px 10px !important; }
-            .share-grid { grid-template-columns: 1fr; }
-            .form-row { flex-direction: column; align-items: stretch; }
-            .vault-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-            .vault-card-thumb { height: 85px; }
-        }
-    </style>
+/* App Wrapper & Layout */
+.app-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Header Styling */
+.app-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    gap: 16px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary-cyan), var(--accent-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: var(--glow-cyan);
+    flex-shrink: 0;
+}
+
+.brand-text h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.version-tag {
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(0, 242, 254, 0.15);
+    color: var(--primary-cyan);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+}
+
+.tagline {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Sync Badge */
+.sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 30px;
+    background: rgba(0, 230, 118, 0.1);
+    border: 1px solid rgba(0, 230, 118, 0.25);
+    font-size: 0.8rem;
+    color: var(--accent-emerald);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--accent-emerald);
+    box-shadow: 0 0 8px var(--accent-emerald);
+    animation: pulseRing 1.8s infinite;
+}
+
+@keyframes pulseRing {
+    0% { transform: scale(0.95); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.4; }
+    100% { transform: scale(0.95); opacity: 1; }
+}
+
+/* BUTTONS WITH VIBRANT ANIMATIONS */
+.btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all var(--transition-fast);
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* ANIMATED DROP & SHARE BUTTON */
+.btn-primary {
+    background: linear-gradient(135deg, #00f2fe, #4facfe, #7f00ff);
+    background-size: 200% 200%;
+    color: #030914;
+    font-weight: 700;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    animation: gradientGlow 3s ease infinite, btnPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes gradientGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes btnPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0, 242, 254, 0.35); }
+    50% { transform: scale(1.04); box-shadow: 0 0 28px rgba(0, 242, 254, 0.65); }
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: rotate(30deg);
+    animation: shimmerSweep 3.2s infinite;
+}
+
+@keyframes shimmerSweep {
+    0% { transform: translateX(-100%) rotate(30deg); }
+    30%, 100% { transform: translateX(100%) rotate(30deg); }
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    color: #fff;
+    box-shadow: var(--glow-purple);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(225, 0, 255, 0.5);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border: 1px solid var(--border-glass);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-danger {
+    background: rgba(255, 8, 68, 0.15);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 8, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 8, 68, 0.28);
+    box-shadow: 0 0 15px rgba(255, 8, 68, 0.3);
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-cyan);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Nav Tabs */
+.nav-tabs {
+    display: flex;
+    padding: 6px;
+    gap: 8px;
+    width: 100%;
+}
+
+.nav-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(127, 0, 255, 0.15));
+    color: var(--primary-cyan);
+    border: 1px solid rgba(0, 242, 254, 0.25);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeInTab 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Share Grid */
+.share-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.dropzone-card, .text-share-card {
+    padding: 24px;
+}
+
+.card-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-header p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Dropzone Styling */
+.dropzone {
+    border: 2px dashed rgba(0, 242, 254, 0.3);
+    border-radius: 16px;
+    padding: 30px 16px;
+    text-align: center;
+    background: rgba(0, 242, 254, 0.02);
+    position: relative;
+    cursor: pointer;
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+.upload-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: rgba(0, 242, 254, 0.1);
+    color: var(--primary-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drop-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.drop-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.supported-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.tag {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    border: 1px solid var(--border-glass);
+}
+
+/* Upload Overlay */
+.upload-progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 12, 20, 0.94);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 5;
+    padding: 20px;
+}
+
+.progress-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(0, 242, 254, 0.2);
+    border-top-color: var(--primary-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.progress-bar-container {
+    width: 80%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-cyan), var(--accent-purple));
+    transition: width 0.2s ease;
+}
+
+.progress-pct {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--primary-cyan);
+}
+
+/* Forms */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.form-input, .form-textarea, .form-select, .form-select-sm {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.form-textarea {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    resize: vertical;
+}
+
+.form-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+}
+
+.flex-1 { flex: 1; }
+.w-full { width: 100%; }
+
+/* Recent Activity Strip */
+.recent-strip-card {
+    padding: 20px 24px;
+}
+
+.strip-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.strip-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.strip-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.recent-items-row {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 8px 4px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-cyan) transparent;
+}
+
+.recent-items-row::-webkit-scrollbar {
+    height: 6px;
+}
+
+.recent-items-row::-webkit-scrollbar-thumb {
+    background: var(--primary-cyan);
+    border-radius: 10px;
+}
+
+.mini-item-card {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.mini-item-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-cyan);
+}
+
+.mini-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(0, 242, 254, 0.12);
+    color: var(--primary-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.mini-details {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.mini-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+.mini-time {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+/* VAULT TOOLBAR */
+.vault-toolbar-card {
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* FUTURISTIC CYBER NEON SEARCH BAR (MATCHING USER REFERENCE IMAGE) */
+.search-box-cyber {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: rgba(8, 12, 24, 0.9);
+    border: 2px solid rgba(0, 242, 254, 0.55);
+    border-radius: 40px;
+    padding: 4px 6px 4px 18px;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.25), inset 0 0 10px rgba(0, 242, 254, 0.15);
+    transition: all 0.3s ease;
+}
+
+.search-box-cyber:focus-within {
+    border-color: #00f2fe;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.55), inset 0 0 15px rgba(0, 242, 254, 0.25);
+}
+
+.search-icon-left {
+    color: var(--primary-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.search-box-cyber input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    padding: 8px 0;
+}
+
+.search-box-cyber input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-action-btn {
+    background: linear-gradient(135deg, #00f2fe, #00c6ff);
+    color: #030a16;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.88rem;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 22px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.search-action-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.75);
+}
+
+.category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+.chip {
+    padding: 6px 14px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.chip.active {
+    background: rgba(0, 242, 254, 0.18);
+    border-color: var(--primary-cyan);
+    color: var(--primary-cyan);
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Vault Grid */
+.vault-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.vault-card {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.vault-card-thumb {
+    height: 130px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.vault-card-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vault-card-meta {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.vault-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.vault-card-actions button {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+}
+
+/* Storage & Analytics */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .analytics-grid { grid-template-columns: 1fr; }
+}
+
+.analytics-card, .tools-card {
+    padding: 24px;
+}
+
+.card-subtext {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+.storage-gauge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    justify-content: center;
+}
+
+.radial-gauge {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+}
+
+.radial-gauge svg {
+    width: 150px;
+    height: 150px;
+}
+
+.gauge-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1) !important;
+    stroke-width: 12;
+}
+
+.gauge-fill {
+    fill: none;
+    stroke: var(--primary-cyan) !important;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.gauge-pct {
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--primary-cyan);
+}
+
+.gauge-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.storage-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 0.88rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.stat-label { color: var(--text-muted); }
+.stat-value { font-family: var(--font-mono); font-weight: 600; color: var(--text-main); }
+
+.tools-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tool-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-glass);
+}
+
+.tool-item.warning-border {
+    border-color: rgba(255, 8, 68, 0.3);
+    background: rgba(255, 8, 68, 0.04);
+}
+
+.tool-info h4 {
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.tool-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* MODALS */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 7, 12, 0.88);
+    backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 540px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.qr-modal-card {
+    max-width: 440px;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.modal-body.align-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-glass);
+}
+
+.modal-footer.justify-center {
+    justify-content: center !important;
+}
+
+.qr-code-box {
+    margin: 0 auto 12px;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+}
+
+.qr-code-box svg, .qr-code-box img {
+    display: block;
+    width: 200px;
+    height: 200px;
+}
+
+.qr-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 10px;
+}
+
+.text-center { text-align: center !important; }
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.toast {
+    pointer-events: auto;
+    min-width: 260px;
+    max-width: 360px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(18, 24, 38, 0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--primary-cyan);
+    color: var(--text-main);
+    font-size: 0.85rem;
+}
+
+.hidden { display: none !important; }
+
+/* ==========================================================================
+   RESPONSIVE MOBILE BREAKPOINTS (NAV TABS 100% VISIBLE SIDE-BY-SIDE)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .app-wrapper { padding: 10px; gap: 12px; }
+
+    /* Nav Tabs Fit Exactly in One Row on Mobile */
+    .nav-tabs {
+        display: flex !important;
+        gap: 4px !important;
+        padding: 4px !important;
+        width: 100% !important;
+    }
+
+    .nav-btn {
+        flex: 1 !important;
+        min-width: 0 !important;
+        padding: 8px 4px !important;
+        font-size: 0.72rem !important;
+        gap: 4px !important;
+        text-align: center !important;
+        justify-content: center !important;
+    }
+
+    .nav-btn svg {
+        width: 15px !important;
+        height: 15px !important;
+    }
+
+    .nav-btn span {
+        white-space: normal !important;
+        line-height: 1.1 !important;
+    }
+    
+    .app-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .brand { justify-content: center; }
+
+    .header-controls {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 6px !important;
+    }
+
+    .phone-connect-btn {
+        display: inline-flex !important;
+        font-size: 0.75rem !important;
+        padding: 6px 10px !important;
+    }
+
+    .sync-badge {
+        font-size: 0.72rem !important;
+        padding: 5px 8px !important;
+    }
+
+    .icon-btn {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    .btn-primary {
+        font-size: 0.78rem !important;
+        padding: 7px 12px !important;
+    }
+
+    .search-action-btn {
+        padding: 6px 14px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .share-grid { grid-template-columns: 1fr; }
+    .form-row { flex-direction: column; align-items: stretch; }
+    .storage-gauge-wrapper { flex-direction: column; }
+    .vault-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+    .vault-card-thumb { height: 85px; }
+    .vault-card-actions { flex-direction: column; }
+}
+
+</style>
 </head>
 <body>
+    <!-- Background Animated Canvas -->
     <canvas id="bg-canvas"></canvas>
+    
+    <!-- Ambient Glow Blobs -->
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
     <div class="ambient-glow glow-3"></div>
 
     <div class="app-wrapper">
+        <!-- Header Bar -->
         <header class="app-header glass-card">
             <div class="brand">
                 <div class="logo-icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                         <polyline points="2 17 12 22 22 17"></polyline>
                         <polyline points="2 12 12 17 22 12"></polyline>
                     </svg>
                 </div>
                 <div class="brand-text">
-                    <h1>VaultPulse <span class="version-tag">PRO WEB ENGINE</span></h1>
-                    <p class="tagline">Zero-Cloud Share & Storage Vault</p>
+                    <h1>VaultPulse <span class="version-tag">LOCAL & 4G/5G v10.0</span></h1>
+                    <p class="tagline">Zero-Cloud Animated Share & Storage Vault</p>
                 </div>
             </div>
 
             <div class="header-controls">
-                <button class="btn btn-secondary phone-connect-btn" id="phone-connect-btn">
+                <!-- Phone Connect Button -->
+                <button class="btn btn-secondary phone-connect-btn" id="phone-connect-btn" title="Scan to open VaultPulse on Mobile">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    </svg>
                     <span>📱 Connect Phone</span>
                 </button>
-                <div class="sync-badge">
+
+                <!-- Live Network Badge -->
+                <div class="sync-badge" id="sync-status-badge" title="Real-time Wi-Fi sync active">
                     <span class="pulse-dot"></span>
-                    <span id="network-ip-display">Wi-Fi Sync Live</span>
+                    <span class="sync-text" id="network-ip-display">Wi-Fi Sync Live</span>
                 </div>
-                <button class="icon-btn" id="audio-toggle-btn">🔊</button>
+
+                <!-- Mute / Sound Toggle -->
+                <button class="icon-btn" id="audio-toggle-btn" title="Toggle UI Sound FX">
+                    <svg id="sound-on-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg id="sound-off-icon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                        <path d="M9 9l3 3m-2-7L6 9H2v6h4l5 4V11"></path>
+                    </svg>
+                </button>
+
+                <!-- Drop & Share Quick Button -->
                 <button class="btn btn-primary" id="quick-add-btn">
-                    <span>+ Drop & Share</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Drop & Share</span>
                 </button>
             </div>
         </header>
 
+        <!-- Main Content Layout -->
         <main class="app-main">
+            <!-- Navigation Tabs Bar (100% VISIBLE ON MOBILE) -->
             <nav class="nav-tabs glass-card">
-                <button class="nav-btn active" data-tab="share"><span>Share Center</span></button>
-                <button class="nav-btn" data-tab="vault"><span>Local Vault (<span id="vault-count-badge">0</span>)</span></button>
-                <button class="nav-btn" data-tab="analytics"><span>Storage & Settings</span></button>
+                <button class="nav-btn active" data-tab="share">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Share Center</span>
+                </button>
+
+                <button class="nav-btn" data-tab="vault">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span>Local Vault (<span id="vault-count-badge">0</span>)</span>
+                </button>
+
+                <button class="nav-btn" data-tab="analytics">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>Storage & Settings</span>
+                </button>
             </nav>
 
+            <!-- TAB 1: SHARE CENTER -->
             <section class="tab-content active" id="tab-share">
                 <div class="share-grid">
+                    <!-- Dropzone Card -->
                     <div class="glass-card dropzone-card">
                         <div class="card-header">
-                            <h2>📁 File Dropzone</h2>
-                            <p>Drag & drop files from PC or Phone to share</p>
+                            <h2><span class="icon">📁</span> File Dropzone</h2>
+                            <p>Drag & drop files from PC or Phone to share over Wi-Fi</p>
                         </div>
+                        
                         <div class="dropzone" id="main-dropzone">
                             <input type="file" id="file-input" multiple style="display: none;">
-                            <div class="upload-icon-wrapper">☁️</div>
-                            <h3 class="drop-title">Drag & Drop Files Here</h3>
-                            <p class="drop-subtitle">or <button type="button" class="btn-link" id="browse-files-btn">browse files</button></p>
+                            <div class="dropzone-content">
+                                <div class="upload-icon-wrapper">
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                        <path d="M12 12v9"></path>
+                                        <path d="m16 16-4-4-4 4"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="drop-title">Drag & Drop Files Here</h3>
+                                <p class="drop-subtitle">or <button type="button" class="btn-link" id="browse-files-btn">browse files</button> from your device</p>
+                                <div class="supported-tags">
+                                    <span class="tag">Images & Photos</span>
+                                    <span class="tag">PDF & Docs</span>
+                                    <span class="tag">Audio & MP3</span>
+                                    <span class="tag">Videos</span>
+                                    <span class="tag">Code & XML</span>
+                                </div>
+                            </div>
+
+                            <!-- Uploading Progress Overlay -->
+                            <div class="upload-progress-overlay hidden" id="upload-progress">
+                                <div class="progress-spinner"></div>
+                                <h4 id="upload-status-text">Processing file upload...</h4>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" id="upload-progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <span class="progress-pct" id="upload-progress-pct">0%</span>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Instant Text & Link Paste Box -->
                     <div class="glass-card text-share-card">
                         <div class="card-header">
-                            <h2>⚡ Quick Text & Link Snippet</h2>
-                            <p>Share code snippets, notes, or web URLs</p>
+                            <h2><span class="icon">⚡</span> Quick Text & Link Snippet</h2>
+                            <p>Share code snippets, notes, or web URLs instantly across devices</p>
                         </div>
+                        
                         <form id="text-share-form">
                             <div class="form-group">
-                                <label for="snippet-title">Title / Name</label>
-                                <input type="text" id="snippet-title" class="form-input" placeholder="e.g. Project Notes, Web Link...">
+                                <label for="snippet-title">Title / Name (Optional)</label>
+                                <input type="text" id="snippet-title" class="form-input" placeholder="e.g. Project Notes, Web Link, Code Snippet...">
                             </div>
+
                             <div class="form-group">
-                                <label for="snippet-content">Content</label>
-                                <textarea id="snippet-content" class="form-textarea" rows="4" placeholder="Paste your text, code, or URL..." required></textarea>
+                                <label for="snippet-content">Content (Text, Code, or URL)</label>
+                                <textarea id="snippet-content" class="form-textarea" rows="5" placeholder="Paste your text, code snippet, JSON, or website URL here..." required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-accent w-full">Save & Broadcast</button>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="snippet-category">Category Tag</label>
+                                    <select id="snippet-category" class="form-select">
+                                        <option value="auto">Auto-Detect Type</option>
+                                        <option value="link">Web Link / URL</option>
+                                        <option value="code">Source Code / JSON</option>
+                                        <option value="text">Text Note</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-accent align-end">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Save & Broadcast</span>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
 
+                <!-- Recent Activity Live Strip -->
                 <div class="glass-card recent-strip-card">
                     <div class="strip-header">
                         <h3><span class="pulse-dot"></span> Live Transferred Items</h3>
+                        <span class="strip-subtitle">Real-time sync stream across devices</span>
                     </div>
                     <div class="recent-items-row" id="recent-items-container">
-                        <div class="empty-state-mini">No items shared yet. Drop a file above!</div>
+                        <div class="empty-state-mini">No items shared yet. Drop a file or paste text above!</div>
                     </div>
                 </div>
             </section>
 
+            <!-- TAB 2: LOCAL VAULT GALLERY -->
             <section class="tab-content" id="tab-vault">
                 <div class="glass-card vault-toolbar-card">
+                    <!-- Futuristic Cyber Neon Search Bar (Matching Reference Image) -->
                     <div class="search-box-cyber">
-                        <div class="search-icon-left">🔍</div>
-                        <input type="text" id="vault-search-input" placeholder="Search by name, content, tag...">
+                        <div class="search-icon-left">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" id="vault-search-input" placeholder="Search by name, content, tag, or file type...">
                         <button class="search-action-btn" id="search-trigger-btn">Search</button>
                     </div>
+
+                    <!-- Category Filter Chips -->
                     <div class="category-chips" id="category-filters">
                         <button class="chip active" data-filter="all">All Items</button>
                         <button class="chip" data-filter="image">🖼️ Images</button>
-                        <button class="chip" data-filter="document">📄 Docs</button>
-                        <button class="chip" data-filter="audio-video">🎵 Audio/Video</button>
-                        <button class="chip" data-filter="code">💻 Code</button>
+                        <button class="chip" data-filter="document">📄 Documents</button>
+                        <button class="chip" data-filter="audio-video">🎵 Audio & Video</button>
+                        <button class="chip" data-filter="code">💻 Code & Snippets</button>
+                        <button class="chip" data-filter="link">🔗 Links</button>
+                    </div>
+
+                    <!-- Sort Controls -->
+                    <div class="sort-controls">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select" class="form-select-sm">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="size-desc">Largest Size</option>
+                            <option value="name">Name (A-Z)</option>
+                        </select>
                     </div>
                 </div>
-                <div class="vault-grid" id="vault-grid"></div>
+
+                <!-- Vault Items Grid -->
+                <div class="vault-grid" id="vault-grid">
+                    <!-- Cards will be populated dynamically -->
+                </div>
+
+                <!-- Vault Empty State -->
+                <div class="empty-state glass-card hidden" id="vault-empty-state">
+                    <div class="empty-icon">📁</div>
+                    <h3>Your Local Vault is Empty</h3>
+                    <p>Items shared will appear here instantly and remain stored in your browser & server.</p>
+                    <button class="btn btn-primary" onclick="document.querySelector('[data-tab=share]').click()">Go to Share Center</button>
+                </div>
             </section>
 
+            <!-- TAB 3: STORAGE & ANALYTICS -->
             <section class="tab-content" id="tab-analytics">
-                <div class="glass-card tools-card" style="padding: 24px;">
-                    <h3>⚙️ Backup & Tools</h3>
-                    <div style="display: flex; gap: 12px; margin-top: 16px;">
-                        <button class="btn btn-secondary" id="export-vault-btn">📤 Export Vault (.json)</button>
-                        <input type="file" id="import-vault-input" accept=".json" style="display:none;">
-                        <button class="btn btn-secondary" id="import-vault-trigger-btn">📥 Import Vault (.json)</button>
-                        <button class="btn btn-danger" id="clear-vault-btn">🗑️ Wipe Vault Clean</button>
+                <div class="analytics-grid">
+                    <!-- Gauge & Meter Card -->
+                    <div class="glass-card analytics-card">
+                        <h3><span class="icon">📊</span> Storage Usage Gauge</h3>
+                        <p class="card-subtext">Browser & Local Disk storage usage metrics</p>
+                        
+                        <div class="storage-gauge-wrapper">
+                            <div class="radial-gauge">
+                                <svg width="150" height="150" viewBox="0 0 150 150">
+                                    <circle class="gauge-bg" cx="75" cy="75" r="62"></circle>
+                                    <circle class="gauge-fill" id="gauge-circle" cx="75" cy="75" r="62" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+                                </svg>
+                                <div class="gauge-center">
+                                    <span class="gauge-pct" id="storage-pct-text">0%</span>
+                                    <span class="gauge-label">Used</span>
+                                </div>
+                            </div>
+                            
+                            <div class="storage-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label">Used Space:</span>
+                                    <span class="stat-value" id="stat-used-bytes">0 MB</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Total Quota:</span>
+                                    <span class="stat-value" id="stat-total-bytes">Estimating...</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Total Items:</span>
+                                    <span class="stat-value" id="stat-item-count">0 items</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vault Backup & Tools Card -->
+                    <div class="glass-card tools-card">
+                        <h3><span class="icon">⚙️</span> Backup & Storage Tools</h3>
+                        <p class="card-subtext">Manage backup import, export, or clear local storage</p>
+                        
+                        <div class="tools-actions">
+                            <!-- Custom Remote Tunnel URL Setting -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>🌍 Custom Public Internet / 4G Tunnel URL (Optional)</h4>
+                                    <p>If Phone & PC are on DIFFERENT networks, paste your ngrok/localtunnel URL:</p>
+                                </div>
+                                <div class="form-row">
+                                    <input type="text" id="custom-tunnel-url-input" class="form-input flex-1" placeholder="e.g. https://my-vaultpulse.loca.lt">
+                                    <button class="btn btn-primary" id="save-tunnel-url-btn">Save URL</button>
+                                </div>
+                            </div>
+
+                            <!-- Export Vault -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>📤 Export Local Vault Backup</h4>
+                                    <p>Download a `.json` backup package containing all items metadata</p>
+                                </div>
+                                <button class="btn btn-secondary" id="export-vault-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Export Vault (.json)</span>
+                                </button>
+                            </div>
+
+                            <!-- Import Vault -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>📥 Restore / Import Vault Backup</h4>
+                                    <p>Import a previously saved `.json` vault backup file into your browser</p>
+                                </div>
+                                <input type="file" id="import-vault-input" accept=".json" style="display: none;">
+                                <button class="btn btn-secondary" id="import-vault-trigger-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span>Import Vault (.json)</span>
+                                </button>
+                            </div>
+
+                            <!-- Wipe Vault -->
+                            <div class="tool-item warning-border">
+                                <div class="tool-info">
+                                    <h4>🗑️ Wipe / Clear Storage Vault</h4>
+                                    <p>Wipe all stored files and snippets from server and browser storage</p>
+                                </div>
+                                <button class="btn btn-danger" id="clear-vault-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    <span>Wipe Vault Clean</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="app.js?v=12.0"></script>
+    <!-- MODAL: PREVIEW ITEM -->
+    <div class="modal-backdrop hidden" id="preview-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="modal-item-title">Item Preview</h3>
+                <button class="close-modal-btn" id="close-preview-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-preview-body">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="modal-footer">
+                <span class="modal-item-meta" id="modal-item-meta">Size: 0 KB • Type: Text</span>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="modal-qr-btn">
+                        <span>Generate Phone QR</span>
+                    </button>
+                    <button class="btn btn-primary" id="modal-download-btn">
+                        <span>Download File</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: QR CODE GENERATOR -->
+    <div class="modal-backdrop hidden" id="qr-modal">
+        <div class="modal-content glass-card qr-modal-card">
+            <div class="modal-header">
+                <h3 id="qr-modal-title">QR Code Share</h3>
+                <button class="close-modal-btn" id="close-qr-btn">&times;</button>
+            </div>
+            <div class="modal-body align-center">
+                <div class="qr-code-box" id="qr-code-container">
+                    <!-- SVG QR Code rendered here -->
+                </div>
+                <p class="qr-hint" id="qr-modal-hint">Scan with smartphone camera to open or download directly on your phone!</p>
+                <div class="form-group w-full margin-top">
+                    <input type="text" readonly id="qr-share-text" class="form-input text-center">
+                </div>
+            </div>
+            <div class="modal-footer justify-center">
+                <button class="btn btn-primary" id="copy-qr-text-btn">
+                    <span>Copy Download Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
     <script>
-        class ParticleBackground {
-            constructor(id) {
-                this.canvas = document.getElementById(id);
-                if (!this.canvas) return;
-                this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.init();
+/* ==========================================================================
+   VaultPulse - Cross-Device Wi-Fi & Local Share Engine v1.5
+   ========================================================================== */
+
+(function() {
+    'use strict';
+
+    // --------------------------------------------------------------------------
+    // 1. WEB AUDIO SYNTHESIZER (Sci-Fi UI Sound Effects)
+    // --------------------------------------------------------------------------
+    class SoundFX {
+        constructor() {
+            this.ctx = null;
+            this.muted = localStorage.getItem('vaultpulse_muted') === 'true';
+            this.updateIcon();
+        }
+
+        initContext() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
             }
-            init() {
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-                this.createParticles();
-                this.animate();
-            }
-            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.createParticles(); }
-            createParticles() {
-                const count = 60;
-                this.particles = [];
-                for (let i = 0; i < count; i++) {
-                    this.particles.push({
-                        x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height,
-                        vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8,
-                        radius: Math.random() * 2 + 1, color: Math.random() > 0.5 ? 'rgba(0, 242, 254, 0.45)' : 'rgba(127, 0, 255, 0.45)'
-                    });
-                }
-            }
-            animate() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                for (let i = 0; i < this.particles.length; i++) {
-                    let p = this.particles[i]; p.x += p.vx; p.y += p.vy;
-                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
-                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
-                    this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                    this.ctx.fillStyle = p.color; this.ctx.fill();
-                }
-                requestAnimationFrame(() => this.animate());
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
             }
         }
-        document.addEventListener('DOMContentLoaded', () => {
+
+        toggleMute() {
+            this.muted = !this.muted;
+            localStorage.setItem('vaultpulse_muted', this.muted);
+            this.updateIcon();
+            if (!this.muted) this.playClick();
+        }
+
+        updateIcon() {
+            const onIcon = document.getElementById('sound-on-icon');
+            const offIcon = document.getElementById('sound-off-icon');
+            if (onIcon && offIcon) {
+                if (this.muted) {
+                    onIcon.classList.add('hidden');
+                    offIcon.classList.remove('hidden');
+                } else {
+                    onIcon.classList.remove('hidden');
+                    offIcon.classList.add('hidden');
+                }
+            }
+        }
+
+        playUpload() {
+            if (this.muted) return;
+            this.initContext();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+        }
+
+        playReceive() {
+            if (this.muted) return;
+            this.initContext();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.setValueAtTime(1040, now + 0.08);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        playDelete() {
+            if (this.muted) return;
+            this.initContext();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+
+        playClick() {
+            if (this.muted) return;
+            this.initContext();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        }
+    }
+
+    const sound = new SoundFX();
+
+    // --------------------------------------------------------------------------
+    // 2. NETWORK QR CODE GENERATOR (Real Downloadable / Connect Links)
+    // --------------------------------------------------------------------------
+    function generateSVGQRCode(text) {
+        const encodedText = encodeURIComponent(text);
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodedText}`;
+        return `<img src="${qrApiUrl}" alt="QR Code" style="width: 200px; height: 200px; border-radius: 8px;" onerror="this.outerHTML='<div style=\'padding:20px;color:#ff4d6d\'>QR Code creation failed. Text too long.</div>'">`;
+    }
+
+    // --------------------------------------------------------------------------
+    // 3. INTERACTIVE BACKGROUND CANVAS
+    // --------------------------------------------------------------------------
+    class ParticleBackground {
+        constructor(canvasId) {
+            this.canvas = document.getElementById(canvasId);
+            if (!this.canvas) return;
+            this.ctx = this.canvas.getContext('2d');
+            this.particles = [];
+            this.mouse = { x: null, y: null, radius: 140 };
+            this.init();
+        }
+
+        init() {
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+
+            const updateMouse = (x, y) => {
+                this.mouse.x = x;
+                this.mouse.y = y;
+            };
+
+            window.addEventListener('mousemove', (e) => updateMouse(e.clientX, e.clientY));
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            });
+            window.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            });
+
+            this.createParticles();
+            this.animate();
+        }
+
+        resize() {
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
+            this.createParticles();
+        }
+
+        createParticles() {
+            const count = Math.min(80, Math.floor((this.canvas.width * this.canvas.height) / 14000));
+            this.particles = [];
+            for (let i = 0; i < count; i++) {
+                this.particles.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    vx: (Math.random() - 0.5) * 0.8,
+                    vy: (Math.random() - 0.5) * 0.8,
+                    radius: Math.random() * 2.2 + 1,
+                    color: Math.random() > 0.5 ? 'rgba(0, 242, 254, 0.45)' : 'rgba(127, 0, 255, 0.45)'
+                });
+            }
+        }
+
+        animate() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+            for (let i = 0; i < this.particles.length; i++) {
+                let p = this.particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = p.color;
+                this.ctx.fill();
+
+                if (this.mouse.x !== null) {
+                    let mdx = p.x - this.mouse.x;
+                    let mdy = p.y - this.mouse.y;
+                    let mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+                    if (mdist < this.mouse.radius) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(p.x, p.y);
+                        this.ctx.lineTo(this.mouse.x, this.mouse.y);
+                        this.ctx.strokeStyle = `rgba(0, 242, 254, ${0.35 * (1 - mdist / this.mouse.radius)})`;
+                        this.ctx.lineWidth = 0.8;
+                        this.ctx.stroke();
+                    }
+                }
+
+                for (let j = i + 1; j < this.particles.length; j++) {
+                    let p2 = this.particles[j];
+                    let dx = p.x - p2.x;
+                    let dy = p.y - p2.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 100) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(p.x, p.y);
+                        this.ctx.lineTo(p2.x, p2.y);
+                        this.ctx.strokeStyle = `rgba(0, 242, 254, ${0.15 * (1 - dist / 100)})`;
+                        this.ctx.lineWidth = 0.6;
+                        this.ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(() => this.animate());
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // 4. MAIN APPLICATION UI & NETWORK SYNC CONTROLLER
+    // --------------------------------------------------------------------------
+    class AppUI {
+        constructor() {
+            this.items = [];
+            this.activeFilter = 'all';
+            this.activeSort = 'newest';
+            this.searchQuery = '';
+            this.networkUrl = window.location.origin;
+            this.localIP = '127.0.0.1';
+            this.sseSource = null;
+        }
+
+        async init() {
             new ParticleBackground('bg-canvas');
+            this.bindEvents();
+            await this.fetchNetworkInfo();
+            this.initRealtimeSSE();
+            await this.refreshVaultData();
+        }
+
+        getNetworkBaseUrl() {
+            const savedTunnel = localStorage.getItem('vaultpulse_custom_tunnel_url');
+            if (savedTunnel && savedTunnel.trim() !== '') {
+                return savedTunnel.trim();
+            }
+            if (this.networkUrl && !this.networkUrl.includes('localhost') && !this.networkUrl.includes('127.0.0.1')) {
+                return this.networkUrl;
+            }
+            const hostIp = (this.localIP && this.localIP !== '127.0.0.1') ? this.localIP : '10.254.30.8';
+            return `http://${hostIp}:3000`;
+        }
+
+        async fetchNetworkInfo() {
+            try {
+                const savedTunnel = localStorage.getItem('vaultpulse_custom_tunnel_url');
+                const tunnelInput = document.getElementById('custom-tunnel-url-input');
+                if (savedTunnel && tunnelInput) {
+                    tunnelInput.value = savedTunnel;
+                }
+
+                const res = await fetch('/api/info');
+                if (res.ok) {
+                    const info = await res.json();
+                    this.localIP = info.localIP;
+                    this.networkUrl = info.networkUrl;
+
+                    const displayEl = document.getElementById('network-ip-display');
+                    if (displayEl) {
+                        displayEl.textContent = savedTunnel ? '4G/5G Tunnel Active' : `Wi-Fi: ${info.localIP}:${info.port}`;
+                    }
+                }
+            } catch (e) {
+                console.log('Running in static mode / standalone');
+            }
+        }
+
+        initRealtimeSSE() {
+            if ('EventSource' in window) {
+                this.sseSource = new EventSource('/api/events');
+                this.sseSource.addEventListener('ADD_ITEM', (e) => {
+                    const data = JSON.parse(e.data);
+                    sound.playReceive();
+                    showToast(`⚡ Live Wi-Fi: New file received (${data.name})!`, 'sync');
+                    this.refreshVaultData();
+                });
+
+                this.sseSource.addEventListener('DELETE_ITEM', (e) => {
+                    showToast('🗑️ Live Wi-Fi: Item removed on another device', 'sync');
+                    this.refreshVaultData();
+                });
+
+                this.sseSource.addEventListener('CLEAR_VAULT', (e) => {
+                    showToast('⚠️ Live Wi-Fi: Vault wiped', 'sync');
+                    this.refreshVaultData();
+                });
+            }
+        }
+
+        bindEvents() {
+            // Audio toggle
+            const audioBtn = document.getElementById('audio-toggle-btn');
+            if (audioBtn) audioBtn.addEventListener('click', () => sound.toggleMute());
+
+            // Phone Connect Header Button
+            const phoneBtn = document.getElementById('phone-connect-btn');
+            if (phoneBtn) phoneBtn.addEventListener('click', () => this.openPhoneConnectQRModal());
+
+            // Tab Navigation
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
+                    sound.playClick();
                     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
                     btn.classList.add('active');
-                    document.getElementById('tab-' + btn.getAttribute('data-tab')).classList.add('active');
+                    const tabId = btn.getAttribute('data-tab');
+                    const targetTab = document.getElementById(`tab-${tabId}`);
+                    if (targetTab) targetTab.classList.add('active');
+                    if (tabId === 'analytics') this.updateStorageAnalytics();
                 });
             });
-        });
-    </script>
+
+            // Quick drop button header
+            const quickAddBtn = document.getElementById('quick-add-btn');
+            if (quickAddBtn) {
+                quickAddBtn.addEventListener('click', () => {
+                    const shareNavBtn = document.querySelector('[data-tab="share"]');
+                    if (shareNavBtn) shareNavBtn.click();
+                });
+            }
+
+            // Dropzone setup
+            const dropzone = document.getElementById('main-dropzone');
+            const fileInput = document.getElementById('file-input');
+            const browseBtn = document.getElementById('browse-files-btn');
+
+            if (browseBtn && fileInput) browseBtn.addEventListener('click', () => fileInput.click());
+            if (dropzone && fileInput) {
+                dropzone.addEventListener('click', (e) => {
+                    if (browseBtn && e.target !== browseBtn && !browseBtn.contains(e.target)) {
+                        fileInput.click();
+                    }
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropzone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropzone.classList.remove('dragover');
+                    }, false);
+                });
+
+                dropzone.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files && files.length > 0) this.handleFileUpload(files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files && e.target.files.length > 0) this.handleFileUpload(e.target.files);
+                });
+            }
+
+            // Text / Link Share Form
+            const textForm = document.getElementById('text-share-form');
+            if (textForm) {
+                textForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleTextShareSubmit();
+                });
+            }
+
+            // Vault Filters
+            document.querySelectorAll('#category-filters .chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    sound.playClick();
+                    document.querySelectorAll('#category-filters .chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    this.activeFilter = chip.getAttribute('data-filter');
+                    this.renderVaultGrid();
+                });
+            });
+
+            // Search Bar
+            const searchInput = document.getElementById('vault-search-input');
+            const searchTriggerBtn = document.getElementById('search-trigger-btn');
+            const clearSearchBtn = document.getElementById('clear-search-btn');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value.trim().toLowerCase();
+                    if (clearSearchBtn) {
+                        if (this.searchQuery) clearSearchBtn.classList.remove('hidden');
+                        else clearSearchBtn.classList.add('hidden');
+                    }
+                    this.renderVaultGrid();
+                });
+            }
+
+            if (searchTriggerBtn) {
+                searchTriggerBtn.addEventListener('click', () => {
+                    sound.playClick();
+                    if (searchInput) this.searchQuery = searchInput.value.trim().toLowerCase();
+                    this.renderVaultGrid();
+                });
+            }
+
+            if (clearSearchBtn && searchInput) {
+                clearSearchBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    this.searchQuery = '';
+                    clearSearchBtn.classList.add('hidden');
+                    this.renderVaultGrid();
+                });
+            }
+
+            // Sort Select
+            document.getElementById('sort-select').addEventListener('change', (e) => {
+                this.activeSort = e.target.value;
+                this.renderVaultGrid();
+            });
+
+            // Modals Close Events
+            document.getElementById('close-preview-btn').addEventListener('click', () => this.closePreviewModal());
+            document.getElementById('close-qr-btn').addEventListener('click', () => this.closeQRModal());
+
+            // Backup & Clear Vault Tools
+            document.getElementById('export-vault-btn').addEventListener('click', () => this.exportVaultBackup());
+
+            // Import Vault Trigger Button
+            const importBtn = document.getElementById('import-vault-trigger-btn');
+            const importInput = document.getElementById('import-vault-input');
+            if (importBtn && importInput) {
+                importBtn.addEventListener('click', () => {
+                    sound.playClick();
+                    importInput.click();
+                });
+                importInput.addEventListener('change', (e) => this.importVaultBackup(e));
+            }
+
+
+
+            // Save Custom 4G/5G Tunnel URL
+            const saveTunnelBtn = document.getElementById('save-tunnel-url-btn');
+            if (saveTunnelBtn) {
+                saveTunnelBtn.addEventListener('click', () => {
+                    sound.playClick();
+                    const val = document.getElementById('custom-tunnel-url-input').value.trim();
+                    if (val) {
+                        localStorage.setItem('vaultpulse_custom_tunnel_url', val);
+                        this.networkUrl = val;
+                        showToast('4G/5G Remote Tunnel URL Saved!', 'success');
+                    } else {
+                        localStorage.removeItem('vaultpulse_custom_tunnel_url');
+                        this.fetchNetworkInfo();
+                        showToast('Reset to Local Wi-Fi Network Mode', 'info');
+                    }
+                });
+            }
+        }
+
+        async refreshVaultData() {
+            try {
+                const res = await fetch('/api/items');
+                if (res.ok) {
+                    this.items = await res.json();
+                }
+                document.getElementById('vault-count-badge').textContent = this.items.length;
+                this.renderRecentStrip();
+                this.renderVaultGrid();
+                this.updateStorageAnalytics();
+            } catch (err) {
+                console.error('Failed to load items from server:', err);
+            }
+        }
+
+        // --- FILE UPLOAD PROCESSING (HIGH SPEED STREAMING FOR LARGE FILES 5GB+) ---
+        async handleFileUpload(fileList) {
+            sound.playClick();
+            const progressOverlay = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('upload-progress-fill');
+            const progressPct = document.getElementById('upload-progress-pct');
+            const statusText = document.getElementById('upload-status-text');
+
+            if (progressOverlay) progressOverlay.classList.remove('hidden');
+
+            const total = fileList.length;
+            for (let i = 0; i < total; i++) {
+                const file = fileList[i];
+                try {
+                    await this.uploadSingleFileStream(file, (pct, speedMBps, loaded, totalBytes) => {
+                        if (progressFill) progressFill.style.width = `${pct}%`;
+                        if (progressPct) progressPct.textContent = `${pct}% (${speedMBps} MB/s)`;
+                        if (statusText) statusText.textContent = `Processing ${file.name} (${this.formatBytes(loaded)} / ${this.formatBytes(totalBytes)})...`;
+                    });
+                } catch (err) {
+                    console.warn('Server upload endpoint offline/static mode, saving file to Browser Local Vault:', err);
+                    const base64 = await this.fileToBase64(file);
+                    const itemRecord = {
+                        id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        name: file.name,
+                        size: file.size,
+                        mimeType: file.type || 'application/octet-stream',
+                        category: this.detectCategory(file.type || '', file.name),
+                        content: base64,
+                        timestamp: Date.now(),
+                        downloadUrl: base64
+                    };
+                    this.vaultData.unshift(itemRecord);
+                    this.saveVaultToLocalStorage();
+                }
+            }
+
+            sound.playUpload();
+            if (progressOverlay) progressOverlay.classList.add('hidden');
+            showToast(`Successfully added ${total} file(s) to Vault!`, 'success');
+            this.renderVaultGrid();
+            this.renderRecentStrip();
+            this.updateStorageAnalytics();
+        }
+
+        uploadSingleFileStream(file, onProgress) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                const itemId = 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                const startTime = Date.now();
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable && onProgress) {
+                        const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
+                        const elapsedTime = Math.max(0.1, (Date.now() - startTime) / 1000);
+                        const speedMBps = ((e.loaded / (1024 * 1024)) / elapsedTime).toFixed(1);
+                        if (pct >= 100) {
+                            const statusText = document.getElementById('upload-status-text');
+                            if (statusText) statusText.textContent = `Finalizing ${file.name}...`;
+                        }
+                        onProgress(pct, speedMBps, e.loaded, e.total);
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve(JSON.parse(xhr.responseText));
+                    } else {
+                        reject(new Error('Upload failed'));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('Network error during file upload'));
+
+                xhr.open('POST', '/api/upload-stream');
+                xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+                xhr.setRequestHeader('X-File-Size', file.size.toString());
+                xhr.setRequestHeader('X-File-Type', encodeURIComponent(file.type || 'application/octet-stream'));
+                xhr.setRequestHeader('X-Item-Id', itemId);
+                xhr.send(file);
+            });
+        }
+
+        fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        detectCategory(mimeType, filename) {
+            if (mimeType.startsWith('image/')) return 'image';
+            if (mimeType.startsWith('audio/') || mimeType.startsWith('video/')) return 'audio-video';
+            if (mimeType.includes('json') || mimeType.includes('javascript') || mimeType.includes('xml') || mimeType.includes('html') || filename.match(/\.(js|py|html|css|json|cpp|c|cs|java|ts|php|xml)$/i)) return 'code';
+            if (mimeType.includes('pdf') || mimeType.includes('text') || mimeType.includes('word') || filename.match(/\.(pdf|doc|docx|txt|md)$/i)) return 'document';
+            return 'document';
+        }
+
+        // --- TEXT & LINK SUBMIT ---
+        async handleTextShareSubmit() {
+            sound.playClick();
+            const titleInput = document.getElementById('snippet-title');
+            const contentInput = document.getElementById('snippet-content');
+            const categorySelect = document.getElementById('snippet-category');
+
+            const content = contentInput.value.trim();
+            if (!content) return;
+
+            let category = categorySelect.value;
+            if (category === 'auto') {
+                if (content.match(/^https?:\/\/[^\s]+$/i)) {
+                    category = 'link';
+                } else if (content.includes('{') || content.includes('function') || content.includes('<html') || content.includes('const ')) {
+                    category = 'code';
+                } else {
+                    category = 'text';
+                }
+            }
+
+            const title = titleInput.value.trim() || (category === 'link' ? content : (content.substring(0, 30) + '...'));
+
+            const itemRecord = {
+                id: 'text_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                name: title,
+                size: new Blob([content]).size,
+                mimeType: category === 'link' ? 'text/url' : 'text/plain',
+                category: category,
+                content: content,
+                timestamp: Date.now(),
+                isSnippet: true
+            };
+
+            await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(itemRecord)
+            });
+
+            sound.playUpload();
+            titleInput.value = '';
+            contentInput.value = '';
+            showToast('Snippet saved & broadcasted across devices!', 'success');
+            await this.refreshVaultData();
+        }
+
+        // --- RENDER RECENT STRIP ---
+        renderRecentStrip() {
+            const container = document.getElementById('recent-items-container');
+            if (this.items.length === 0) {
+                container.innerHTML = '<div class="empty-state-mini">No items shared yet. Drop a file or paste text above!</div>';
+                return;
+            }
+
+            const sorted = [...this.items].sort((a, b) => b.timestamp - a.timestamp).slice(0, 6);
+            let html = '';
+
+            sorted.forEach(item => {
+                const icon = this.getCategoryIcon(item.category);
+                const timeAgo = this.formatTimeAgo(item.timestamp);
+
+                html += `
+                    <div class="mini-item-card" onclick="appUI.openPreviewModal('${item.id}')">
+                        <div class="mini-icon">${icon}</div>
+                        <div class="mini-details">
+                            <div class="mini-title">${this.escapeHTML(item.name)}</div>
+                            <div class="mini-time">${timeAgo} • ${this.formatBytes(item.size)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // --- RENDER VAULT GRID ---
+        renderVaultGrid() {
+            const grid = document.getElementById('vault-grid');
+            const emptyState = document.getElementById('vault-empty-state');
+
+            let filtered = this.items.filter(item => {
+                if (this.activeFilter !== 'all') {
+                    if (this.activeFilter === 'image' && item.category !== 'image') return false;
+                    if (this.activeFilter === 'document' && item.category !== 'document' && item.category !== 'text') return false;
+                    if (this.activeFilter === 'audio-video' && item.category !== 'audio-video') return false;
+                    if (this.activeFilter === 'code' && item.category !== 'code') return false;
+                    if (this.activeFilter === 'link' && item.category !== 'link') return false;
+                }
+
+                if (this.searchQuery) {
+                    const matchName = item.name.toLowerCase().includes(this.searchQuery);
+                    const matchCategory = item.category.toLowerCase().includes(this.searchQuery);
+                    const matchContent = item.isSnippet ? item.content.toLowerCase().includes(this.searchQuery) : false;
+                    return matchName || matchCategory || matchContent;
+                }
+
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (this.activeSort === 'newest') return b.timestamp - a.timestamp;
+                if (this.activeSort === 'oldest') return a.timestamp - b.timestamp;
+                if (this.activeSort === 'size-desc') return b.size - a.size;
+                if (this.activeSort === 'name') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            let html = '';
+
+            filtered.forEach(item => {
+                const icon = this.getCategoryIcon(item.category);
+                let thumbnailHTML = `<div class="large-icon">${icon}</div>`;
+
+                if (item.category === 'image' && item.content && item.content.startsWith('data:image')) {
+                    thumbnailHTML = `<img src="${item.content}" alt="preview">`;
+                } else if (item.isSnippet) {
+                    thumbnailHTML = `<div class="snippet-preview">${this.escapeHTML(item.content.substring(0, 150))}</div>`;
+                }
+
+                html += `
+                    <div class="glass-card vault-card">
+                        <div class="vault-card-thumb" onclick="appUI.openPreviewModal('${item.id}')">
+                            ${thumbnailHTML}
+                        </div>
+                        <div class="vault-card-info">
+                            <div class="vault-card-title" title="${this.escapeHTML(item.name)}">${this.escapeHTML(item.name)}</div>
+                            <div class="vault-card-meta">
+                                <span>${this.formatBytes(item.size)}</span>
+                                <span>${this.formatTimeAgo(item.timestamp)}</span>
+                            </div>
+                            <div class="vault-card-actions">
+                                <button class="btn btn-secondary" onclick="appUI.openPreviewModal('${item.id}')">View</button>
+                                <button class="btn btn-secondary" onclick="appUI.openQRModal('${item.id}')">Phone QR</button>
+                                <button class="btn btn-danger" onclick="appUI.deleteVaultItem('${item.id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // --- PREVIEW MODAL ---
+        openPreviewModal(id) {
+            sound.playClick();
+            const item = this.items.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('modal-item-title').textContent = item.name;
+            document.getElementById('modal-item-meta').textContent = `Size: ${this.formatBytes(item.size)} • Type: ${item.category.toUpperCase()}`;
+
+            const body = document.getElementById('modal-preview-body');
+            const downloadBtn = document.getElementById('modal-download-btn');
+            const qrBtn = document.getElementById('modal-qr-btn');
+
+            qrBtn.onclick = () => this.openQRModal(id);
+            downloadBtn.onclick = () => this.downloadItem(item);
+
+            if (item.category === 'image' && item.content && item.content.startsWith('data:image')) {
+                body.innerHTML = `<img src="${item.content}" class="modal-preview-img" alt="preview">`;
+            } else if (item.category === 'audio-video' && item.content && item.content.startsWith('data:audio')) {
+                body.innerHTML = `<audio controls src="${item.content}" class="modal-preview-audio"></audio>`;
+            } else if (item.isSnippet) {
+                body.innerHTML = `<pre class="modal-preview-text"><code>${this.escapeHTML(item.content)}</code></pre>`;
+            } else {
+                body.innerHTML = `<div class="empty-state">
+                    <div class="empty-icon">${this.getCategoryIcon(item.category)}</div>
+                    <p>File ready. Click below to download directly onto your device.</p>
+                </div>`;
+            }
+
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        closePreviewModal() {
+            sound.playClick();
+            document.getElementById('preview-modal').classList.add('hidden');
+        }
+
+        // --- CONNECT PHONE QR MODAL ---
+        openPhoneConnectQRModal() {
+            sound.playClick();
+            const qrContainer = document.getElementById('qr-code-container');
+            const qrText = document.getElementById('qr-share-text');
+            const copyBtn = document.getElementById('copy-qr-text-btn');
+            const titleEl = document.getElementById('qr-modal-title');
+            const hintEl = document.getElementById('qr-modal-hint');
+
+            titleEl.textContent = '📱 Smartphone Connect QR';
+            hintEl.textContent = 'Scan this QR code with your smartphone camera to open VaultPulse instantly on your mobile device!';
+
+            const connectUrl = this.getNetworkBaseUrl();
+            qrContainer.innerHTML = generateSVGQRCode(connectUrl);
+            qrText.value = connectUrl;
+
+            copyBtn.textContent = 'Copy Wi-Fi URL';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(connectUrl);
+                sound.playClick();
+                showToast('Wi-Fi URL copied to clipboard!', 'success');
+            };
+
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        // --- FILE ITEM QR MODAL ---
+        openQRModal(id) {
+            sound.playClick();
+            const item = this.items.find(i => i.id === id);
+            if (!item) return;
+
+            const qrContainer = document.getElementById('qr-code-container');
+            const qrText = document.getElementById('qr-share-text');
+            const copyBtn = document.getElementById('copy-qr-text-btn');
+            const titleEl = document.getElementById('qr-modal-title');
+            const hintEl = document.getElementById('qr-modal-hint');
+
+            titleEl.textContent = `File Share: ${item.name}`;
+            hintEl.textContent = 'Scan with smartphone camera to download this file directly to your phone over Wi-Fi!';
+
+            const downloadUrl = `${this.getNetworkBaseUrl()}/api/download/${item.id}`;
+            qrContainer.innerHTML = generateSVGQRCode(downloadUrl);
+            qrText.value = downloadUrl;
+
+            copyBtn.textContent = 'Copy Download Link';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(downloadUrl);
+                sound.playClick();
+                showToast('Direct download link copied!', 'success');
+            };
+
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        closeQRModal() {
+            sound.playClick();
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        // --- ITEM ACTIONS ---
+        downloadItem(item) {
+            sound.playClick();
+            const downloadUrl = `${this.networkUrl}/api/download/${item.id}`;
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = item.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async deleteVaultItem(id) {
+            sound.playDelete();
+            await fetch(`/api/items/${id}`, { method: 'DELETE' });
+            showToast('Item deleted across devices', 'info');
+            await this.refreshVaultData();
+        }
+
+        async clearVaultData() {
+            sound.playClick();
+            if (confirm('Are you sure you want to wipe all stored items from server and browser storage?')) {
+                sound.playDelete();
+                try {
+                    await fetch('/api/clear', { method: 'POST' });
+                } catch(e) {}
+                try {
+                    await vaultDB.clearAll();
+                } catch(e) {}
+                this.items = [];
+                showToast('Vault wiped completely clean!', 'info');
+                await this.refreshVaultData();
+            }
+        }
+
+        // --- STORAGE ANALYTICS ---
+        async updateStorageAnalytics() {
+            const usedBytesEl = document.getElementById('stat-used-bytes');
+            const totalBytesEl = document.getElementById('stat-total-bytes');
+            const itemCountEl = document.getElementById('stat-item-count');
+            const pctText = document.getElementById('storage-pct-text');
+            const gaugeCircle = document.getElementById('gauge-circle');
+
+            let totalSize = this.items.reduce((acc, item) => acc + item.size, 0);
+            usedBytesEl.textContent = this.formatBytes(totalSize);
+            itemCountEl.textContent = `${this.items.length} items`;
+
+            if ('storage' in navigator && 'estimate' in navigator.storage) {
+                try {
+                    const estimate = await navigator.storage.estimate();
+                    const quota = estimate.quota || 1073741824;
+                    totalBytesEl.textContent = this.formatBytes(quota);
+
+                    const pct = Math.min(100, Math.round((estimate.usage / quota) * 100));
+                    pctText.textContent = `${pct}%`;
+
+                    const offset = 471 - (471 * pct) / 100;
+                    gaugeCircle.style.strokeDashoffset = offset;
+                } catch (e) {
+                    totalBytesEl.textContent = 'Standard Quota';
+                }
+            }
+        }
+
+        // --- BACKUP EXPORT & IMPORT ---
+        exportVaultBackup() {
+            sound.playClick();
+            if (this.items.length === 0) {
+                showToast('Vault is empty, nothing to export!', 'error');
+                return;
+            }
+
+            const exportObj = {
+                version: 'VaultPulse_v1.5',
+                exportedAt: new Date().toISOString(),
+                items: this.items
+            };
+
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute('href', dataStr);
+            downloadAnchor.setAttribute('download', `VaultPulse_Backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showToast('Exported vault backup (.json)', 'success');
+        }
+
+        async importVaultBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            sound.playClick();
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.items && Array.isArray(parsed.items)) {
+                        for (const item of parsed.items) {
+                            await fetch('/api/upload', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(item)
+                            });
+                        }
+                        showToast(`Restored ${parsed.items.length} items to vault!`, 'success');
+                        await this.refreshVaultData();
+                    } else {
+                        showToast('Invalid backup file format.', 'error');
+                    }
+                } catch (err) {
+                    showToast('Failed to parse backup JSON file.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- UTILITIES ---
+        getCategoryIcon(category) {
+            switch(category) {
+                case 'image': return '🖼️';
+                case 'audio-video': return '🎵';
+                case 'code': return '💻';
+                case 'link': return '🔗';
+                default: return '📄';
+            }
+        }
+
+        formatBytes(bytes, decimals = 1) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        formatTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+
+        escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    }
+
+    // --- GLOBAL TOAST NOTIFICATION ---
+    window.showToast = function(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `<span>${message}</span>`;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(50px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    };
+
+    // Initialize App safely regardless of DOM load state
+    function startApp() {
+        if (!window.appUI) {
+            window.appUI = new AppUI();
+            window.appUI.init();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startApp);
+    } else {
+        startApp();
+    }
+
+})();
+
+</script>
 </body>
 </html>
