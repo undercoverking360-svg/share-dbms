@@ -1930,6 +1930,42 @@ html, body {
                                 this.updateStorageAnalytics();
                                 setTimeout(() => this.openPreviewModal(data.item.id), 250);
                             }
+                        } else if (data && data.type === 'SYNC_CHUNK' && data.senderId !== this.clientId) {
+                            if (!this.chunkBuffers) this.chunkBuffers = {};
+                            if (!this.chunkBuffers[data.transferId]) {
+                                this.chunkBuffers[data.transferId] = {
+                                    total: data.totalChunks,
+                                    count: 0,
+                                    chunks: new Array(data.totalChunks)
+                                };
+                                showToast(`⚡ Stream receiving file...`, 'sync');
+                            }
+                            const buf = this.chunkBuffers[data.transferId];
+                            if (!buf.chunks[data.chunkIndex]) {
+                                buf.chunks[data.chunkIndex] = data.chunkData;
+                                buf.count++;
+                            }
+                            if (buf.count === buf.total) {
+                                try {
+                                    const fullJsonStr = buf.chunks.join('');
+                                    const item = JSON.parse(fullJsonStr);
+                                    delete this.chunkBuffers[data.transferId];
+
+                                    sound.playReceive();
+                                    showToast(`⚡ Real-Time Sync: Received ${item.name}!`, 'sync');
+                                    const exists = this.items.find(i => i.id === item.id);
+                                    if (!exists) {
+                                        this.items.unshift(item);
+                                        this.saveVaultToLocalStorage();
+                                        this.renderVaultGrid();
+                                        this.renderRecentStrip();
+                                        this.updateStorageAnalytics();
+                                        setTimeout(() => this.openPreviewModal(item.id), 250);
+                                    }
+                                } catch(e) {
+                                    console.error('Chunk reassembly error:', e);
+                                }
+                            }
                         } else if (data && data.type === 'REQUEST_ITEM' && data.senderId !== this.clientId) {
                             const found = this.items.find(i => i.id === data.itemId);
                             if (found) {
@@ -1950,11 +1986,29 @@ html, body {
 
             if (this.wsRelay && this.wsRelay.readyState === WebSocket.OPEN) {
                 try {
-                    this.wsRelay.send(JSON.stringify({
-                        type: 'SYNC_ITEM',
-                        senderId: this.clientId,
-                        item: itemRecord
-                    }));
+                    const jsonStr = JSON.stringify(itemRecord);
+                    const CHUNK_SIZE = 32000;
+                    if (jsonStr.length <= CHUNK_SIZE) {
+                        this.wsRelay.send(JSON.stringify({
+                            type: 'SYNC_ITEM',
+                            senderId: this.clientId,
+                            item: itemRecord
+                        }));
+                    } else {
+                        const totalChunks = Math.ceil(jsonStr.length / CHUNK_SIZE);
+                        const transferId = 'tr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                        for (let i = 0; i < totalChunks; i++) {
+                            const chunk = jsonStr.substring(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                            this.wsRelay.send(JSON.stringify({
+                                type: 'SYNC_CHUNK',
+                                senderId: this.clientId,
+                                transferId: transferId,
+                                chunkIndex: i,
+                                totalChunks: totalChunks,
+                                chunkData: chunk
+                            }));
+                        }
+                    }
                 } catch(e) {}
             }
         }
@@ -2648,7 +2702,7 @@ html, body {
         }
 
         // --- CONNECT PHONE QR MODAL ---
-        openPhoneConnectQRModal() {
+        async openPhoneConnectQRModal() {
             sound.playClick();
             const qrContainer = document.getElementById('qr-code-container');
             const qrText = document.getElementById('qr-share-text');
@@ -2657,17 +2711,25 @@ html, body {
             const hintEl = document.getElementById('qr-modal-hint');
 
             titleEl.textContent = '📱 Smartphone Connect QR';
-            hintEl.textContent = 'Scan this QR code with your smartphone camera to open VaultPulse instantly on your mobile device!';
+            hintEl.textContent = 'Scan with smartphone camera to connect mobile directly to your PC Hard Drive Vault over Wi-Fi!';
 
-            const connectUrl = this.getNetworkBaseUrl();
+            let connectUrl = `http://${this.localIP || 'localhost'}:3000`;
+            try {
+                const res = await fetch('http://localhost:3000/api/info');
+                if (res.ok) {
+                    const info = await res.json();
+                    if (info.networkUrl) connectUrl = info.networkUrl;
+                }
+            } catch(e) {}
+
             qrContainer.innerHTML = generateSVGQRCode(connectUrl);
             qrText.value = connectUrl;
 
-            copyBtn.textContent = 'Copy Wi-Fi URL';
+            copyBtn.textContent = 'Copy Direct Wi-Fi URL';
             copyBtn.onclick = () => {
                 navigator.clipboard.writeText(connectUrl);
                 sound.playClick();
-                showToast('Wi-Fi URL copied to clipboard!', 'success');
+                showToast('Direct Wi-Fi URL copied to clipboard!', 'success');
             };
 
             document.getElementById('qr-modal').classList.remove('hidden');
