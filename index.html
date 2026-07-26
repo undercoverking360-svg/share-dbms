@@ -709,6 +709,7 @@ html, body {
 
 .search-box-cyber input {
     flex: 1;
+    min-width: 0;
     background: transparent;
     border: none;
     outline: none;
@@ -720,6 +721,9 @@ html, body {
 
 .search-box-cyber input::placeholder {
     color: rgba(255, 255, 255, 0.5);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .search-action-btn {
@@ -735,6 +739,7 @@ html, body {
     box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
     transition: all 0.2s ease;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .search-action-btn:hover {
@@ -990,7 +995,15 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     border-bottom: 1px solid var(--border-glass);
+}
+
+.modal-header h3 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80%;
 }
 
 .close-modal-btn {
@@ -1917,6 +1930,11 @@ html, body {
                                 this.updateStorageAnalytics();
                                 setTimeout(() => this.openPreviewModal(data.item.id), 250);
                             }
+                        } else if (data && data.type === 'REQUEST_ITEM' && data.senderId !== this.clientId) {
+                            const found = this.items.find(i => i.id === data.itemId);
+                            if (found) {
+                                this.broadcastNewItem(found);
+                            }
                         }
                     } catch(e) {}
                 };
@@ -2656,35 +2674,43 @@ html, body {
         }
 
         checkHashNavigation() {
-            if (window.location.hash) {
-                if (window.location.hash.startsWith('#payload=')) {
-                    try {
-                        const raw = window.location.hash.replace('#payload=', '');
-                        const item = JSON.parse(decodeURIComponent(raw));
-                        if (item && item.id) {
-                            const exists = this.items.find(i => i.id === item.id);
-                            if (!exists) {
-                                this.items.unshift(item);
-                                this.saveVaultToLocalStorage();
-                                this.renderVaultGrid();
-                                this.renderRecentStrip();
-                                this.updateStorageAnalytics();
-                            }
-                            sound.playReceive();
-                            showToast(`⚡ Received ${item.name}! Opening download preview...`, 'success');
-                            setTimeout(() => this.openPreviewModal(item.id), 300);
-                        }
-                    } catch(e) {
-                        console.error('Failed to parse URL share payload:', e);
-                    }
-                } else if (window.location.hash.startsWith('#item=')) {
-                    const itemId = window.location.hash.replace('#item=', '').trim();
-                    const item = this.items.find(i => i.id === itemId);
-                    if (item) {
-                        this.openPreviewModal(itemId);
-                        showToast(`Loaded item: ${item.name}`, 'info');
+            if (window.location.hash && window.location.hash.startsWith('#item=')) {
+                const itemId = window.location.hash.replace('#item=', '').trim();
+                const item = this.items.find(i => i.id === itemId);
+                if (item) {
+                    this.openPreviewModal(itemId);
+                    showToast(`Loaded item: ${item.name}`, 'info');
+                } else {
+                    // Request item from connected peers/server
+                    showToast(`Requesting shared item...`, 'sync');
+                    if (this.wsRelay && this.wsRelay.readyState === WebSocket.OPEN) {
+                        try {
+                            this.wsRelay.send(JSON.stringify({
+                                type: 'REQUEST_ITEM',
+                                itemId: itemId,
+                                senderId: this.clientId
+                            }));
+                        } catch(e) {}
                     }
                 }
+            } else if (window.location.hash && window.location.hash.startsWith('#payload=')) {
+                try {
+                    const raw = window.location.hash.replace('#payload=', '');
+                    const item = JSON.parse(decodeURIComponent(raw));
+                    if (item && item.id) {
+                        const exists = this.items.find(i => i.id === item.id);
+                        if (!exists) {
+                            this.items.unshift(item);
+                            this.saveVaultToLocalStorage();
+                            this.renderVaultGrid();
+                            this.renderRecentStrip();
+                            this.updateStorageAnalytics();
+                        }
+                        sound.playReceive();
+                        showToast(`⚡ Received ${item.name}! Opening preview...`, 'success');
+                        setTimeout(() => this.openPreviewModal(item.id), 300);
+                    }
+                } catch(e) {}
             }
         }
 
@@ -2701,12 +2727,12 @@ html, body {
             const hintEl = document.getElementById('qr-modal-hint');
 
             titleEl.textContent = `Share: ${item.name}`;
-            hintEl.textContent = 'Scan with smartphone camera to open and receive this item instantly on mobile!';
+            hintEl.textContent = 'Scan with smartphone camera to open and download this item instantly on mobile!';
 
-            let shareUrl = '';
-            if (item.category === 'link' && item.content.startsWith('http')) {
-                shareUrl = item.content;
-            } else {
+            let shareUrl = `${window.location.origin}${window.location.pathname}#item=${item.id}`;
+
+            // If lightweight text snippet, embed directly in payload
+            if (item.isSnippet && item.content && item.content.length < 500) {
                 const payload = {
                     id: item.id,
                     name: item.name,
@@ -2715,7 +2741,7 @@ html, body {
                     category: item.category,
                     content: item.content,
                     timestamp: item.timestamp,
-                    isSnippet: item.isSnippet || false
+                    isSnippet: true
                 };
                 const encoded = encodeURIComponent(JSON.stringify(payload));
                 shareUrl = `${window.location.origin}${window.location.pathname}#payload=${encoded}`;
@@ -2739,20 +2765,61 @@ html, body {
             document.getElementById('qr-modal').classList.add('hidden');
         }
 
-        // --- ITEM ACTIONS ---
         downloadItem(item) {
             sound.playClick();
-            let fileHref = item.downloadUrl || item.content;
-            if (!fileHref || (!fileHref.startsWith('data:') && !fileHref.startsWith('http'))) {
-                fileHref = `${this.networkUrl}/api/download/${item.id}`;
+            let content = item.downloadUrl || item.content;
+            if (!content) {
+                showToast('File data missing.', 'error');
+                return;
             }
-            const a = document.createElement('a');
-            a.href = fileHref;
-            a.download = item.name || 'download';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast(`Downloading ${item.name}...`, 'success');
+
+            try {
+                let blob;
+                if (content.startsWith('data:')) {
+                    const arr = content.split(',');
+                    const mimeMatch = arr[0].match(/:(.*?);/);
+                    const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+                    const bstr = atob(arr[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while (n--) {
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    blob = new Blob([u8arr], { type: mime });
+                } else if (content.startsWith('http')) {
+                    const a = document.createElement('a');
+                    a.href = content;
+                    a.download = item.name || 'download';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showToast(`Downloading ${item.name}...`, 'success');
+                    return;
+                } else {
+                    blob = new Blob([content], { type: item.mimeType || 'text/plain' });
+                }
+
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = item.name || 'download';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 300);
+                showToast(`Downloading ${item.name}...`, 'success');
+            } catch(e) {
+                console.error('Blob download fallback:', e);
+                const a = document.createElement('a');
+                a.href = content;
+                a.download = item.name || 'download';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast(`Downloading ${item.name}...`, 'success');
+            }
         }
 
         async deleteVaultItem(id) {
