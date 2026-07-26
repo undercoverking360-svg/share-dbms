@@ -1823,7 +1823,53 @@ html, body {
             this.bindEvents();
             await this.fetchNetworkInfo();
             this.initRealtimeSSE();
+            this.initBroadcastChannelSync();
             await this.refreshVaultData();
+            this.checkHashNavigation();
+            window.addEventListener('hashchange', () => this.checkHashNavigation());
+        }
+
+        initBroadcastChannelSync() {
+            if ('BroadcastChannel' in window) {
+                try {
+                    this.broadcastChannel = new BroadcastChannel('vaultpulse_realtime_sync');
+                    this.broadcastChannel.onmessage = (event) => {
+                        if (event.data && event.data.type === 'SYNC_ITEM') {
+                            sound.playReceive();
+                            showToast(`⚡ Real-Time Sync: New item received (${event.data.item.name})!`, 'sync');
+                            const exists = this.items.find(i => i.id === event.data.item.id);
+                            if (!exists) {
+                                this.items.unshift(event.data.item);
+                                this.saveVaultToLocalStorage();
+                                this.renderVaultGrid();
+                                this.renderRecentStrip();
+                                this.updateStorageAnalytics();
+                            }
+                        } else if (event.data && event.data.type === 'WIPE_VAULT') {
+                            this.items = [];
+                            localStorage.removeItem('vaultpulse_items');
+                            this.renderVaultGrid();
+                            this.renderRecentStrip();
+                            this.updateStorageAnalytics();
+                        }
+                    };
+                } catch(e) {}
+            }
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'vaultpulse_items') {
+                    sound.playReceive();
+                    this.refreshVaultData();
+                }
+            });
+        }
+
+        broadcastNewItem(itemRecord) {
+            if (this.broadcastChannel) {
+                try {
+                    this.broadcastChannel.postMessage({ type: 'SYNC_ITEM', item: itemRecord });
+                } catch(e) {}
+            }
         }
 
         getNetworkBaseUrl() {
@@ -2129,6 +2175,7 @@ html, body {
                     };
                     this.items.unshift(itemRecord);
                     this.saveVaultToLocalStorage();
+                    this.broadcastNewItem(itemRecord);
                     if (progressFill) progressFill.style.width = `100%`;
                     if (progressPct) progressPct.textContent = `100%`;
                 } else {
@@ -2154,6 +2201,7 @@ html, body {
                         };
                         this.items.unshift(itemRecord);
                         this.saveVaultToLocalStorage();
+                        this.broadcastNewItem(itemRecord);
                     }
                 }
             }
@@ -2471,6 +2519,17 @@ html, body {
             document.getElementById('qr-modal').classList.remove('hidden');
         }
 
+        checkHashNavigation() {
+            if (window.location.hash && window.location.hash.startsWith('#item=')) {
+                const itemId = window.location.hash.replace('#item=', '').trim();
+                const item = this.items.find(i => i.id === itemId);
+                if (item) {
+                    this.openPreviewModal(itemId);
+                    showToast(`Loaded item: ${item.name}`, 'info');
+                }
+            }
+        }
+
         // --- FILE ITEM QR MODAL ---
         openQRModal(id) {
             sound.playClick();
@@ -2483,18 +2542,21 @@ html, body {
             const titleEl = document.getElementById('qr-modal-title');
             const hintEl = document.getElementById('qr-modal-hint');
 
-            titleEl.textContent = `File Share: ${item.name}`;
-            hintEl.textContent = 'Scan with smartphone camera to download this file directly to your phone over Wi-Fi!';
+            titleEl.textContent = `Share: ${item.name}`;
+            hintEl.textContent = 'Scan with smartphone camera to open and receive this item instantly!';
 
-            const downloadUrl = `${this.getNetworkBaseUrl()}/api/download/${item.id}`;
-            qrContainer.innerHTML = generateSVGQRCode(downloadUrl);
-            qrText.value = downloadUrl;
+            let shareUrl = (item.category === 'link' && item.content.startsWith('http')) 
+                ? item.content 
+                : `${window.location.origin}${window.location.pathname}#item=${item.id}`;
 
-            copyBtn.textContent = 'Copy Download Link';
+            qrContainer.innerHTML = generateSVGQRCode(shareUrl);
+            qrText.value = shareUrl;
+
+            copyBtn.textContent = 'Copy Share Link';
             copyBtn.onclick = () => {
-                navigator.clipboard.writeText(downloadUrl);
+                navigator.clipboard.writeText(shareUrl);
                 sound.playClick();
-                showToast('Direct download link copied!', 'success');
+                showToast('Share link copied to clipboard!', 'success');
             };
 
             document.getElementById('qr-modal').classList.remove('hidden');
