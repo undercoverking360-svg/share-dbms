@@ -2079,17 +2079,21 @@ html, body {
 
             if (progressOverlay) progressOverlay.classList.remove('hidden');
 
+            const isStaticHost = window.location.hostname.includes('vercel.app') || 
+                                 window.location.hostname.includes('netlify.app') || 
+                                 window.location.hostname.includes('github.io') ||
+                                 window.location.hostname.includes('welcomeriteshguru.in') ||
+                                 (window.location.protocol === 'https:' && !window.location.port);
+
             const total = fileList.length;
             for (let i = 0; i < total; i++) {
                 const file = fileList[i];
-                try {
-                    await this.uploadSingleFileStream(file, (pct, speedMBps, loaded, totalBytes) => {
-                        if (progressFill) progressFill.style.width = `${pct}%`;
-                        if (progressPct) progressPct.textContent = `${pct}% (${speedMBps} MB/s)`;
-                        if (statusText) statusText.textContent = `Processing ${file.name} (${this.formatBytes(loaded)} / ${this.formatBytes(totalBytes)})...`;
-                    });
-                } catch (err) {
-                    console.warn('Server upload endpoint offline/static mode, saving file to Browser Local Vault:', err);
+                if (progressFill) progressFill.style.width = `50%`;
+                if (progressPct) progressPct.textContent = `50%`;
+                if (statusText) statusText.textContent = `Processing ${file.name} (${this.formatBytes(file.size)})...`;
+
+                if (isStaticHost) {
+                    // Instant Browser Vault Storage for Vercel/Static Sites
                     const base64 = await this.fileToBase64(file);
                     const itemRecord = {
                         id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -2103,6 +2107,32 @@ html, body {
                     };
                     this.vaultData.unshift(itemRecord);
                     this.saveVaultToLocalStorage();
+                    if (progressFill) progressFill.style.width = `100%`;
+                    if (progressPct) progressPct.textContent = `100%`;
+                } else {
+                    // Wi-Fi Stream Upload for Local Node.js Server
+                    try {
+                        await this.uploadSingleFileStream(file, (pct, speedMBps, loaded, totalBytes) => {
+                            if (progressFill) progressFill.style.width = `${pct}%`;
+                            if (progressPct) progressPct.textContent = `${pct}% (${speedMBps} MB/s)`;
+                            if (statusText) statusText.textContent = `Streaming ${file.name} (${this.formatBytes(loaded)} / ${this.formatBytes(totalBytes)})...`;
+                        });
+                    } catch (err) {
+                        console.warn('Server upload offline, saving to Browser Vault:', err);
+                        const base64 = await this.fileToBase64(file);
+                        const itemRecord = {
+                            id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                            name: file.name,
+                            size: file.size,
+                            mimeType: file.type || 'application/octet-stream',
+                            category: this.detectCategory(file.type || '', file.name),
+                            content: base64,
+                            timestamp: Date.now(),
+                            downloadUrl: base64
+                        };
+                        this.vaultData.unshift(itemRecord);
+                        this.saveVaultToLocalStorage();
+                    }
                 }
             }
 
