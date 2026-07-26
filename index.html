@@ -993,6 +993,33 @@ html, body {
     border-bottom: 1px solid var(--border-glass);
 }
 
+.close-modal-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-glass);
+    color: var(--primary-cyan);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 8, 68, 0.25);
+    border-color: rgba(255, 8, 68, 0.5);
+    color: #ff4d6d;
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 0 15px rgba(255, 8, 68, 0.4);
+}
+
 .modal-body {
     padding: 20px;
     overflow-y: auto;
@@ -1816,6 +1843,7 @@ html, body {
             this.networkUrl = window.location.origin;
             this.localIP = '127.0.0.1';
             this.sseSource = null;
+            this.clientId = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         }
 
         async init() {
@@ -1862,12 +1890,53 @@ html, body {
                     this.refreshVaultData();
                 }
             });
+
+            // Cross-Device WebSocket Relay Sync for Custom Domain / Vercel
+            try {
+                const roomKey = (window.location.hostname || 'local').replace(/[^a-zA-Z0-9]/g, '');
+                const wsUrl = `wss://socketsbay.com/wss/v2/1/vaultpulse_${roomKey}/`;
+                this.wsRelay = new WebSocket(wsUrl);
+
+                this.wsRelay.onopen = () => {
+                    const syncText = document.getElementById('network-ip-display');
+                    if (syncText) syncText.textContent = 'Realtime Sync Live';
+                };
+
+                this.wsRelay.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data && data.type === 'SYNC_ITEM' && data.senderId !== this.clientId) {
+                            sound.playReceive();
+                            showToast(`⚡ Real-Time Sync: New item received (${data.item.name})!`, 'sync');
+                            const exists = this.items.find(i => i.id === data.item.id);
+                            if (!exists) {
+                                this.items.unshift(data.item);
+                                this.saveVaultToLocalStorage();
+                                this.renderVaultGrid();
+                                this.renderRecentStrip();
+                                this.updateStorageAnalytics();
+                                setTimeout(() => this.openPreviewModal(data.item.id), 250);
+                            }
+                        }
+                    } catch(e) {}
+                };
+            } catch(e) {}
         }
 
         broadcastNewItem(itemRecord) {
             if (this.broadcastChannel) {
                 try {
                     this.broadcastChannel.postMessage({ type: 'SYNC_ITEM', item: itemRecord });
+                } catch(e) {}
+            }
+
+            if (this.wsRelay && this.wsRelay.readyState === WebSocket.OPEN) {
+                try {
+                    this.wsRelay.send(JSON.stringify({
+                        type: 'SYNC_ITEM',
+                        senderId: this.clientId,
+                        item: itemRecord
+                    }));
                 } catch(e) {}
             }
         }
@@ -1902,9 +1971,56 @@ html, body {
                     if (displayEl) {
                         displayEl.textContent = savedTunnel ? '4G/5G Tunnel Active' : `Wi-Fi: ${info.localIP}:${info.port}`;
                     }
+                } else {
+                    await this.autoDetectLocalWiFiServer();
                 }
             } catch (e) {
-                console.log('Running in static mode / standalone');
+                await this.autoDetectLocalWiFiServer();
+            }
+        }
+
+        async autoDetectLocalWiFiServer() {
+            const savedTunnel = localStorage.getItem('vaultpulse_custom_tunnel_url');
+            const candidateUrls = [
+                savedTunnel,
+                'http://localhost:3000',
+                'http://127.0.0.1:3000'
+            ];
+
+            for (const url of candidateUrls) {
+                if (!url) continue;
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 1000);
+                    const res = await fetch(`${url}/api/info`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        const info = await res.json();
+                        this.localIP = info.localIP;
+                        this.networkUrl = url;
+                        
+                        const displayEl = document.getElementById('network-ip-display');
+                        if (displayEl) {
+                            displayEl.textContent = `🟢 Wi-Fi Local Server: ${info.localIP}:${info.port}`;
+                            displayEl.style.color = '#00f2fe';
+                        }
+
+                        if ('EventSource' in window) {
+                            if (this.sseSource) this.sseSource.close();
+                            this.sseSource = new EventSource(`${url}/api/events`);
+                            this.sseSource.addEventListener('ADD_ITEM', (e) => {
+                                const data = JSON.parse(e.data);
+                                sound.playReceive();
+                                showToast(`⚡ Live Wi-Fi: New file received (${data.name})!`, 'sync');
+                                this.refreshVaultData();
+                            });
+                            this.sseSource.addEventListener('DELETE_ITEM', () => this.refreshVaultData());
+                            this.sseSource.addEventListener('CLEAR_VAULT', () => this.refreshVaultData());
+                        }
+                        showToast(`⚡ Linked Domain to Local PC Server (${info.localIP})`, 'success');
+                        return;
+                    }
+                } catch(e) {}
             }
         }
 
@@ -2062,8 +2178,28 @@ html, body {
             });
 
             // Modals Close Events
-            document.getElementById('close-preview-btn').addEventListener('click', () => this.closePreviewModal());
-            document.getElementById('close-qr-btn').addEventListener('click', () => this.closeQRModal());
+            const closePreviewBtn = document.getElementById('close-preview-btn');
+            if (closePreviewBtn) closePreviewBtn.addEventListener('click', () => this.closePreviewModal());
+
+            const closeQrBtn = document.getElementById('close-qr-btn');
+            if (closeQrBtn) closeQrBtn.addEventListener('click', () => this.closeQRModal());
+
+            // Close modal when clicking backdrop
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.addEventListener('click', (e) => {
+                    if (e.target === backdrop) {
+                        sound.playClick();
+                        backdrop.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Close modal when pressing Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.classList.add('hidden'));
+                }
+            });
 
             // Backup & Clear Vault Tools
             const exportBtn = document.getElementById('export-vault-btn');
@@ -2520,12 +2656,34 @@ html, body {
         }
 
         checkHashNavigation() {
-            if (window.location.hash && window.location.hash.startsWith('#item=')) {
-                const itemId = window.location.hash.replace('#item=', '').trim();
-                const item = this.items.find(i => i.id === itemId);
-                if (item) {
-                    this.openPreviewModal(itemId);
-                    showToast(`Loaded item: ${item.name}`, 'info');
+            if (window.location.hash) {
+                if (window.location.hash.startsWith('#payload=')) {
+                    try {
+                        const raw = window.location.hash.replace('#payload=', '');
+                        const item = JSON.parse(decodeURIComponent(raw));
+                        if (item && item.id) {
+                            const exists = this.items.find(i => i.id === item.id);
+                            if (!exists) {
+                                this.items.unshift(item);
+                                this.saveVaultToLocalStorage();
+                                this.renderVaultGrid();
+                                this.renderRecentStrip();
+                                this.updateStorageAnalytics();
+                            }
+                            sound.playReceive();
+                            showToast(`⚡ Received ${item.name}! Opening download preview...`, 'success');
+                            setTimeout(() => this.openPreviewModal(item.id), 300);
+                        }
+                    } catch(e) {
+                        console.error('Failed to parse URL share payload:', e);
+                    }
+                } else if (window.location.hash.startsWith('#item=')) {
+                    const itemId = window.location.hash.replace('#item=', '').trim();
+                    const item = this.items.find(i => i.id === itemId);
+                    if (item) {
+                        this.openPreviewModal(itemId);
+                        showToast(`Loaded item: ${item.name}`, 'info');
+                    }
                 }
             }
         }
@@ -2543,11 +2701,25 @@ html, body {
             const hintEl = document.getElementById('qr-modal-hint');
 
             titleEl.textContent = `Share: ${item.name}`;
-            hintEl.textContent = 'Scan with smartphone camera to open and receive this item instantly!';
+            hintEl.textContent = 'Scan with smartphone camera to open and receive this item instantly on mobile!';
 
-            let shareUrl = (item.category === 'link' && item.content.startsWith('http')) 
-                ? item.content 
-                : `${window.location.origin}${window.location.pathname}#item=${item.id}`;
+            let shareUrl = '';
+            if (item.category === 'link' && item.content.startsWith('http')) {
+                shareUrl = item.content;
+            } else {
+                const payload = {
+                    id: item.id,
+                    name: item.name,
+                    size: item.size,
+                    mimeType: item.mimeType,
+                    category: item.category,
+                    content: item.content,
+                    timestamp: item.timestamp,
+                    isSnippet: item.isSnippet || false
+                };
+                const encoded = encodeURIComponent(JSON.stringify(payload));
+                shareUrl = `${window.location.origin}${window.location.pathname}#payload=${encoded}`;
+            }
 
             qrContainer.innerHTML = generateSVGQRCode(shareUrl);
             qrText.value = shareUrl;
