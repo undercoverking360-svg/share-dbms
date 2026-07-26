@@ -2054,19 +2054,37 @@ html, body {
             }
         }
 
+        saveVaultToLocalStorage() {
+            try {
+                localStorage.setItem('vaultpulse_items', JSON.stringify(this.items));
+            } catch (e) {
+                console.warn('LocalStorage full/quota error:', e);
+            }
+        }
+
         async refreshVaultData() {
             try {
                 const res = await fetch('/api/items');
                 if (res.ok) {
                     this.items = await res.json();
+                    this.saveVaultToLocalStorage();
+                } else {
+                    const saved = localStorage.getItem('vaultpulse_items');
+                    if (saved) {
+                        try { this.items = JSON.parse(saved); } catch(e){}
+                    }
                 }
-                document.getElementById('vault-count-badge').textContent = this.items.length;
-                this.renderRecentStrip();
-                this.renderVaultGrid();
-                this.updateStorageAnalytics();
             } catch (err) {
-                console.error('Failed to load items from server:', err);
+                const saved = localStorage.getItem('vaultpulse_items');
+                if (saved) {
+                    try { this.items = JSON.parse(saved); } catch(e){}
+                }
             }
+            const badge = document.getElementById('vault-count-badge');
+            if (badge) badge.textContent = this.items.length;
+            this.renderRecentStrip();
+            this.renderVaultGrid();
+            this.updateStorageAnalytics();
         }
 
         // --- FILE UPLOAD PROCESSING (HIGH SPEED STREAMING FOR LARGE FILES 5GB+) ---
@@ -2105,7 +2123,7 @@ html, body {
                         timestamp: Date.now(),
                         downloadUrl: base64
                     };
-                    this.vaultData.unshift(itemRecord);
+                    this.items.unshift(itemRecord);
                     this.saveVaultToLocalStorage();
                     if (progressFill) progressFill.style.width = `100%`;
                     if (progressPct) progressPct.textContent = `100%`;
@@ -2130,7 +2148,7 @@ html, body {
                             timestamp: Date.now(),
                             downloadUrl: base64
                         };
-                        this.vaultData.unshift(itemRecord);
+                        this.items.unshift(itemRecord);
                         this.saveVaultToLocalStorage();
                     }
                 }
@@ -2233,11 +2251,16 @@ html, body {
                 isSnippet: true
             };
 
-            await fetch('/api/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(itemRecord)
-            });
+            try {
+                await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(itemRecord)
+                });
+            } catch (err) {
+                this.items.unshift(itemRecord);
+                this.saveVaultToLocalStorage();
+            }
 
             sound.playUpload();
             titleInput.value = '';
