@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VaultPulse - Animated Local Share & Storage Vault</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=10.0">
+</head>
+<body>
+    <!-- Background Animated Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    
+    <!-- Ambient Glow Blobs -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="app-wrapper">
+        <!-- Header Bar -->
+        <header class="app-header glass-card">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>VaultPulse <span class="version-tag">LOCAL & 4G/5G v10.0</span></h1>
+                    <p class="tagline">Zero-Cloud Animated Share & Storage Vault</p>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <!-- Phone Connect Button -->
+                <button class="btn btn-secondary phone-connect-btn" id="phone-connect-btn" title="Scan to open VaultPulse on Mobile">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    </svg>
+                    <span>📱 Connect Phone</span>
+                </button>
+
+                <!-- Live Network Badge -->
+                <div class="sync-badge" id="sync-status-badge" title="Real-time Wi-Fi sync active">
+                    <span class="pulse-dot"></span>
+                    <span class="sync-text" id="network-ip-display">Wi-Fi Sync Live</span>
+                </div>
+
+                <!-- Mute / Sound Toggle -->
+                <button class="icon-btn" id="audio-toggle-btn" title="Toggle UI Sound FX">
+                    <svg id="sound-on-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg id="sound-off-icon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                        <path d="M9 9l3 3m-2-7L6 9H2v6h4l5 4V11"></path>
+                    </svg>
+                </button>
+
+                <!-- Drop & Share Quick Button -->
+                <button class="btn btn-primary" id="quick-add-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Drop & Share</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Layout -->
+        <main class="app-main">
+            <!-- Navigation Tabs Bar (100% VISIBLE ON MOBILE) -->
+            <nav class="nav-tabs glass-card">
+                <button class="nav-btn active" data-tab="share">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Share Center</span>
+                </button>
+
+                <button class="nav-btn" data-tab="vault">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="17" x2="12" y2="21"></line>
+                    </svg>
+                    <span>Local Vault (<span id="vault-count-badge">0</span>)</span>
+                </button>
+
+                <button class="nav-btn" data-tab="analytics">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>Storage & Settings</span>
+                </button>
+            </nav>
+
+            <!-- TAB 1: SHARE CENTER -->
+            <section class="tab-content active" id="tab-share">
+                <div class="share-grid">
+                    <!-- Dropzone Card -->
+                    <div class="glass-card dropzone-card">
+                        <div class="card-header">
+                            <h2><span class="icon">📁</span> File Dropzone</h2>
+                            <p>Drag & drop files from PC or Phone to share over Wi-Fi</p>
+                        </div>
+                        
+                        <div class="dropzone" id="main-dropzone">
+                            <input type="file" id="file-input" multiple style="display: none;">
+                            <div class="dropzone-content">
+                                <div class="upload-icon-wrapper">
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                                        <path d="M12 12v9"></path>
+                                        <path d="m16 16-4-4-4 4"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="drop-title">Drag & Drop Files Here</h3>
+                                <p class="drop-subtitle">or <button type="button" class="btn-link" id="browse-files-btn">browse files</button> from your device</p>
+                                <div class="supported-tags">
+                                    <span class="tag">Images & Photos</span>
+                                    <span class="tag">PDF & Docs</span>
+                                    <span class="tag">Audio & MP3</span>
+                                    <span class="tag">Videos</span>
+                                    <span class="tag">Code & XML</span>
+                                </div>
+                            </div>
+
+                            <!-- Uploading Progress Overlay -->
+                            <div class="upload-progress-overlay hidden" id="upload-progress">
+                                <div class="progress-spinner"></div>
+                                <h4 id="upload-status-text">Processing file upload...</h4>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" id="upload-progress-fill" style="width: 0%;"></div>
+                                </div>
+                                <span class="progress-pct" id="upload-progress-pct">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instant Text & Link Paste Box -->
+                    <div class="glass-card text-share-card">
+                        <div class="card-header">
+                            <h2><span class="icon">⚡</span> Quick Text & Link Snippet</h2>
+                            <p>Share code snippets, notes, or web URLs instantly across devices</p>
+                        </div>
+                        
+                        <form id="text-share-form">
+                            <div class="form-group">
+                                <label for="snippet-title">Title / Name (Optional)</label>
+                                <input type="text" id="snippet-title" class="form-input" placeholder="e.g. Project Notes, Web Link, Code Snippet...">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="snippet-content">Content (Text, Code, or URL)</label>
+                                <textarea id="snippet-content" class="form-textarea" rows="5" placeholder="Paste your text, code snippet, JSON, or website URL here..." required></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="snippet-category">Category Tag</label>
+                                    <select id="snippet-category" class="form-select">
+                                        <option value="auto">Auto-Detect Type</option>
+                                        <option value="link">Web Link / URL</option>
+                                        <option value="code">Source Code / JSON</option>
+                                        <option value="text">Text Note</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-accent align-end">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Save & Broadcast</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Live Strip -->
+                <div class="glass-card recent-strip-card">
+                    <div class="strip-header">
+                        <h3><span class="pulse-dot"></span> Live Transferred Items</h3>
+                        <span class="strip-subtitle">Real-time sync stream across devices</span>
+                    </div>
+                    <div class="recent-items-row" id="recent-items-container">
+                        <div class="empty-state-mini">No items shared yet. Drop a file or paste text above!</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: LOCAL VAULT GALLERY -->
+            <section class="tab-content" id="tab-vault">
+                <div class="glass-card vault-toolbar-card">
+                    <!-- Futuristic Cyber Neon Search Bar (Matching Reference Image) -->
+                    <div class="search-box-cyber">
+                        <div class="search-icon-left">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+                        <input type="text" id="vault-search-input" placeholder="Search by name, content, tag, or file type...">
+                        <button class="search-action-btn" id="search-trigger-btn">Search</button>
+                    </div>
+
+                    <!-- Category Filter Chips -->
+                    <div class="category-chips" id="category-filters">
+                        <button class="chip active" data-filter="all">All Items</button>
+                        <button class="chip" data-filter="image">🖼️ Images</button>
+                        <button class="chip" data-filter="document">📄 Documents</button>
+                        <button class="chip" data-filter="audio-video">🎵 Audio & Video</button>
+                        <button class="chip" data-filter="code">💻 Code & Snippets</button>
+                        <button class="chip" data-filter="link">🔗 Links</button>
+                    </div>
+
+                    <!-- Sort Controls -->
+                    <div class="sort-controls">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select" class="form-select-sm">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="size-desc">Largest Size</option>
+                            <option value="name">Name (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Vault Items Grid -->
+                <div class="vault-grid" id="vault-grid">
+                    <!-- Cards will be populated dynamically -->
+                </div>
+
+                <!-- Vault Empty State -->
+                <div class="empty-state glass-card hidden" id="vault-empty-state">
+                    <div class="empty-icon">📁</div>
+                    <h3>Your Local Vault is Empty</h3>
+                    <p>Items shared will appear here instantly and remain stored in your browser & server.</p>
+                    <button class="btn btn-primary" onclick="document.querySelector('[data-tab=share]').click()">Go to Share Center</button>
+                </div>
+            </section>
+
+            <!-- TAB 3: STORAGE & ANALYTICS -->
+            <section class="tab-content" id="tab-analytics">
+                <div class="analytics-grid">
+                    <!-- Gauge & Meter Card -->
+                    <div class="glass-card analytics-card">
+                        <h3><span class="icon">📊</span> Storage Usage Gauge</h3>
+                        <p class="card-subtext">Browser & Local Disk storage usage metrics</p>
+                        
+                        <div class="storage-gauge-wrapper">
+                            <div class="radial-gauge">
+                                <svg width="150" height="150" viewBox="0 0 150 150">
+                                    <circle class="gauge-bg" cx="75" cy="75" r="62"></circle>
+                                    <circle class="gauge-fill" id="gauge-circle" cx="75" cy="75" r="62" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+                                </svg>
+                                <div class="gauge-center">
+                                    <span class="gauge-pct" id="storage-pct-text">0%</span>
+                                    <span class="gauge-label">Used</span>
+                                </div>
+                            </div>
+                            
+                            <div class="storage-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label">Used Space:</span>
+                                    <span class="stat-value" id="stat-used-bytes">0 MB</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Total Quota:</span>
+                                    <span class="stat-value" id="stat-total-bytes">Estimating...</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Total Items:</span>
+                                    <span class="stat-value" id="stat-item-count">0 items</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vault Backup & Tools Card -->
+                    <div class="glass-card tools-card">
+                        <h3><span class="icon">⚙️</span> Backup & Storage Tools</h3>
+                        <p class="card-subtext">Manage backup import, export, or clear local storage</p>
+                        
+                        <div class="tools-actions">
+                            <!-- Custom Remote Tunnel URL Setting -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>🌍 Custom Public Internet / 4G Tunnel URL (Optional)</h4>
+                                    <p>If Phone & PC are on DIFFERENT networks, paste your ngrok/localtunnel URL:</p>
+                                </div>
+                                <div class="form-row">
+                                    <input type="text" id="custom-tunnel-url-input" class="form-input flex-1" placeholder="e.g. https://my-vaultpulse.loca.lt">
+                                    <button class="btn btn-primary" id="save-tunnel-url-btn">Save URL</button>
+                                </div>
+                            </div>
+
+                            <!-- Export Vault -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>📤 Export Local Vault Backup</h4>
+                                    <p>Download a `.json` backup package containing all items metadata</p>
+                                </div>
+                                <button class="btn btn-secondary" id="export-vault-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Export Vault (.json)</span>
+                                </button>
+                            </div>
+
+                            <!-- Import Vault -->
+                            <div class="tool-item">
+                                <div class="tool-info">
+                                    <h4>📥 Restore / Import Vault Backup</h4>
+                                    <p>Import a previously saved `.json` vault backup file into your browser</p>
+                                </div>
+                                <input type="file" id="import-vault-input" accept=".json" style="display: none;">
+                                <button class="btn btn-secondary" id="import-vault-trigger-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span>Import Vault (.json)</span>
+                                </button>
+                            </div>
+
+                            <!-- Wipe Vault -->
+                            <div class="tool-item warning-border">
+                                <div class="tool-info">
+                                    <h4>🗑️ Wipe / Clear Storage Vault</h4>
+                                    <p>Wipe all stored files and snippets from server and browser storage</p>
+                                </div>
+                                <button class="btn btn-danger" id="clear-vault-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    <span>Wipe Vault Clean</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: PREVIEW ITEM -->
+    <div class="modal-backdrop hidden" id="preview-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="modal-item-title">Item Preview</h3>
+                <button class="close-modal-btn" id="close-preview-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-preview-body">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="modal-footer">
+                <span class="modal-item-meta" id="modal-item-meta">Size: 0 KB • Type: Text</span>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="modal-qr-btn">
+                        <span>Generate Phone QR</span>
+                    </button>
+                    <button class="btn btn-primary" id="modal-download-btn">
+                        <span>Download File</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: QR CODE GENERATOR -->
+    <div class="modal-backdrop hidden" id="qr-modal">
+        <div class="modal-content glass-card qr-modal-card">
+            <div class="modal-header">
+                <h3 id="qr-modal-title">QR Code Share</h3>
+                <button class="close-modal-btn" id="close-qr-btn">&times;</button>
+            </div>
+            <div class="modal-body align-center">
+                <div class="qr-code-box" id="qr-code-container">
+                    <!-- SVG QR Code rendered here -->
+                </div>
+                <p class="qr-hint" id="qr-modal-hint">Scan with smartphone camera to open or download directly on your phone!</p>
+                <div class="form-group w-full margin-top">
+                    <input type="text" readonly id="qr-share-text" class="form-input text-center">
+                </div>
+            </div>
+            <div class="modal-footer justify-center">
+                <button class="btn btn-primary" id="copy-qr-text-btn">
+                    <span>Copy Download Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js?v=12.0"></script>
+</body>
+</html>
