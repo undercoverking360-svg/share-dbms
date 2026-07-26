@@ -321,6 +321,28 @@ html, body {
     border-color: rgba(255, 255, 255, 0.25);
 }
 
+.btn-cyber-fast {
+    background: linear-gradient(135deg, #7f00ff, #e100ff);
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 0 15px rgba(225, 0, 255, 0.4);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-cyber-fast:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(225, 0, 255, 0.8);
+    color: #ffffff !important;
+}
+
 .btn-danger {
     background: rgba(255, 8, 68, 0.15);
     color: #ff4d6d;
@@ -1228,13 +1250,18 @@ html, body {
 
             <div class="header-controls">
                 <!-- Phone Connect Button -->
-                <button class="btn btn-secondary phone-connect-btn" id="phone-connect-btn" title="Scan to open VaultPulse on Mobile">
+                <button class="btn btn-secondary phone-connect-btn" id="phone-connect-btn" title="Scan to connect mobile directly">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
                         <line x1="12" y1="18" x2="12.01" y2="18"></line>
                     </svg>
-                    <span>📱 Connect Phone</span>
+                    <span>Connect Phone</span>
                 </button>
+
+                <!-- Fast PC-Phone Button -->
+                <a href="http://localhost:3000" id="fast-pc-phone-btn" class="btn btn-cyber-fast" title="Open PC Localhost Server (http://localhost:3000)">
+                    ⚡ Fast (PC-Phone)
+                </a>
 
                 <!-- Live Network Badge -->
                 <div class="sync-badge" id="sync-status-badge" title="Real-time Wi-Fi sync active">
@@ -2056,7 +2083,9 @@ html, body {
             const candidateUrls = [
                 savedTunnel,
                 'http://localhost:3000',
-                'http://127.0.0.1:3000'
+                'http://localhost:3999',
+                'http://127.0.0.1:3000',
+                'http://127.0.0.1:3999'
             ];
 
             for (const url of candidateUrls) {
@@ -2068,29 +2097,34 @@ html, body {
                     clearTimeout(timeoutId);
                     if (res.ok) {
                         const info = await res.json();
-                        this.localIP = info.localIP;
-                        this.networkUrl = url;
-                        
-                        const displayEl = document.getElementById('network-ip-display');
-                        if (displayEl) {
-                            displayEl.textContent = `🟢 Wi-Fi Local Server: ${info.localIP}:${info.port}`;
-                            displayEl.style.color = '#00f2fe';
-                        }
+                        if (info.app === 'VaultPulse' || info.localIP) {
+                            this.localIP = info.localIP;
+                            this.serverPort = info.port || 3000;
+                            this.networkUrl = info.networkUrl || url;
+                            this.activeLocalServerUrl = url;
 
-                        if ('EventSource' in window) {
-                            if (this.sseSource) this.sseSource.close();
-                            this.sseSource = new EventSource(`${url}/api/events`);
-                            this.sseSource.addEventListener('ADD_ITEM', (e) => {
-                                const data = JSON.parse(e.data);
-                                sound.playReceive();
-                                showToast(`⚡ Live Wi-Fi: New file received (${data.name})!`, 'sync');
-                                this.refreshVaultData();
-                            });
-                            this.sseSource.addEventListener('DELETE_ITEM', () => this.refreshVaultData());
-                            this.sseSource.addEventListener('CLEAR_VAULT', () => this.refreshVaultData());
+                            const displayEl = document.getElementById('network-ip-display');
+                            if (displayEl) {
+                                displayEl.textContent = `🟢 Wi-Fi Server Verified: ${info.localIP}:${info.port || 3000}`;
+                                displayEl.style.color = '#00f2fe';
+                            }
+
+                            if ('EventSource' in window) {
+                                if (this.sseSource) this.sseSource.close();
+                                this.sseSource = new EventSource(`${url}/api/events`);
+                                this.sseSource.addEventListener('ADD_ITEM', (e) => {
+                                    const data = JSON.parse(e.data);
+                                    sound.playReceive();
+                                    showToast(`⚡ Live Wi-Fi: New file received (${data.name})!`, 'sync');
+                                    this.refreshVaultData();
+                                });
+                                this.sseSource.addEventListener('DELETE_ITEM', () => this.refreshVaultData());
+                                this.sseSource.addEventListener('CLEAR_VAULT', () => this.refreshVaultData());
+                            }
+                            this.refreshVaultData();
+                            showToast(`⚡ Linked Domain to Local PC Server (${info.localIP})`, 'success');
+                            return;
                         }
-                        showToast(`⚡ Linked Domain to Local PC Server (${info.localIP})`, 'success');
-                        return;
                     }
                 } catch(e) {}
             }
@@ -2322,7 +2356,11 @@ html, body {
 
         async refreshVaultData() {
             try {
-                const res = await fetch('/api/items');
+                let fetchUrl = '/api/items';
+                if (this.activeLocalServerUrl) {
+                    fetchUrl = `${this.activeLocalServerUrl}/api/items`;
+                }
+                const res = await fetch(fetchUrl);
                 if (res.ok) {
                     this.items = await res.json();
                     this.saveVaultToLocalStorage();
@@ -2702,7 +2740,7 @@ html, body {
         }
 
         // --- CONNECT PHONE QR MODAL ---
-        async openPhoneConnectQRModal() {
+        openPhoneConnectQRModal() {
             sound.playClick();
             const qrContainer = document.getElementById('qr-code-container');
             const qrText = document.getElementById('qr-share-text');
@@ -2711,28 +2749,42 @@ html, body {
             const hintEl = document.getElementById('qr-modal-hint');
 
             titleEl.textContent = '📱 Smartphone Connect QR';
-            hintEl.textContent = 'Scan with smartphone camera to connect mobile directly to your PC Hard Drive Vault over Wi-Fi!';
+            hintEl.textContent = 'Scan with smartphone camera to connect mobile directly over Wi-Fi!';
 
-            let connectUrl = `http://${this.localIP || 'localhost'}:3000`;
-            try {
-                const res = await fetch('http://localhost:3000/api/info');
-                if (res.ok) {
-                    const info = await res.json();
-                    if (info.networkUrl) connectUrl = info.networkUrl;
-                }
-            } catch(e) {}
+            let connectUrl = (this.networkUrl && !this.networkUrl.includes('localhost') && !this.networkUrl.includes('127.0.0.1')) 
+                ? this.networkUrl 
+                : `${window.location.origin}`;
 
             qrContainer.innerHTML = generateSVGQRCode(connectUrl);
             qrText.value = connectUrl;
 
-            copyBtn.textContent = 'Copy Direct Wi-Fi URL';
+            copyBtn.textContent = 'Copy Connect URL';
             copyBtn.onclick = () => {
                 navigator.clipboard.writeText(connectUrl);
                 sound.playClick();
-                showToast('Direct Wi-Fi URL copied to clipboard!', 'success');
+                showToast('Connect URL copied to clipboard!', 'success');
             };
 
+            // Open modal INSTANTLY (0ms delay)
             document.getElementById('qr-modal').classList.remove('hidden');
+
+            // Asynchronously check local server IP in background (non-blocking)
+            setTimeout(async () => {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 600);
+                    const res = await fetch('http://localhost:3000/api/info', { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        const info = await res.json();
+                        if (info.networkUrl) {
+                            connectUrl = info.networkUrl;
+                            qrContainer.innerHTML = generateSVGQRCode(connectUrl);
+                            qrText.value = connectUrl;
+                        }
+                    }
+                } catch(e) {}
+            }, 50);
         }
 
         checkHashNavigation() {
