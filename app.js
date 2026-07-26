@@ -512,22 +512,41 @@
             const progressPct = document.getElementById('upload-progress-pct');
             const statusText = document.getElementById('upload-status-text');
 
-            progressOverlay.classList.remove('hidden');
+            if (progressOverlay) progressOverlay.classList.remove('hidden');
 
             const total = fileList.length;
             for (let i = 0; i < total; i++) {
                 const file = fileList[i];
-                await this.uploadSingleFileStream(file, (pct, speedMBps, loaded, totalBytes) => {
-                    progressFill.style.width = `${pct}%`;
-                    progressPct.textContent = `${pct}% (${speedMBps} MB/s)`;
-                    statusText.textContent = `Streaming ${file.name} (${this.formatBytes(loaded)} / ${this.formatBytes(totalBytes)}) over Wi-Fi...`;
-                });
+                try {
+                    await this.uploadSingleFileStream(file, (pct, speedMBps, loaded, totalBytes) => {
+                        if (progressFill) progressFill.style.width = `${pct}%`;
+                        if (progressPct) progressPct.textContent = `${pct}% (${speedMBps} MB/s)`;
+                        if (statusText) statusText.textContent = `Processing ${file.name} (${this.formatBytes(loaded)} / ${this.formatBytes(totalBytes)})...`;
+                    });
+                } catch (err) {
+                    console.warn('Server upload endpoint offline/static mode, saving file to Browser Local Vault:', err);
+                    const base64 = await this.fileToBase64(file);
+                    const itemRecord = {
+                        id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        name: file.name,
+                        size: file.size,
+                        mimeType: file.type || 'application/octet-stream',
+                        category: this.detectCategory(file.type || '', file.name),
+                        content: base64,
+                        timestamp: Date.now(),
+                        downloadUrl: base64
+                    };
+                    this.vaultData.unshift(itemRecord);
+                    this.saveVaultToLocalStorage();
+                }
             }
 
             sound.playUpload();
-            progressOverlay.classList.add('hidden');
-            showToast(`Successfully uploaded ${total} file(s) over local Wi-Fi!`, 'success');
-            await this.refreshVaultData();
+            if (progressOverlay) progressOverlay.classList.add('hidden');
+            showToast(`Successfully added ${total} file(s) to Vault!`, 'success');
+            this.renderVaultGrid();
+            this.renderRecentStrip();
+            this.updateStorageAnalytics();
         }
 
         uploadSingleFileStream(file, onProgress) {
