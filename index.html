@@ -2533,27 +2533,37 @@ html, body {
             const contentInput = document.getElementById('snippet-content');
             const categorySelect = document.getElementById('snippet-category');
 
-            const content = contentInput.value.trim();
+            const content = contentInput ? contentInput.value.trim() : '';
             if (!content) return;
 
-            let category = categorySelect.value;
-            if (category === 'auto') {
-                if (content.match(/^https?:\/\/[^\s]+$/i)) {
+            let userSelectedCategory = categorySelect ? categorySelect.value : 'auto';
+            let category = userSelectedCategory;
+
+            if (userSelectedCategory === 'auto') {
+                if (/^https?:\/\/[^\s]+$/i.test(content)) {
                     category = 'link';
-                } else if (content.includes('{') || content.includes('function') || content.includes('<html') || content.includes('const ')) {
+                } else if (/<[a-z][\s\S]*>/i.test(content) || /function|const|let|var|class|import|export|<html/i.test(content)) {
                     category = 'code';
                 } else {
                     category = 'text';
                 }
             }
 
-            const title = titleInput.value.trim() || (category === 'link' ? content : (content.substring(0, 30) + '...'));
+            let title = titleInput && titleInput.value.trim() ? titleInput.value.trim() : '';
+            if (!title) {
+                if (category === 'link') {
+                    title = content.length > 35 ? content.substring(0, 32) + '...' : content;
+                } else {
+                    const firstLine = content.split('\n')[0].replace(/<[^>]*>/g, '').trim();
+                    title = firstLine.length > 30 ? firstLine.substring(0, 27) + '...' : (firstLine || 'Text Snippet');
+                }
+            }
 
             const itemRecord = {
                 id: 'text_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
                 name: title,
                 size: new Blob([content]).size,
-                mimeType: category === 'link' ? 'text/url' : 'text/plain',
+                mimeType: category === 'link' ? 'text/url' : (category === 'code' ? 'text/html' : 'text/plain'),
                 category: category,
                 content: content,
                 timestamp: Date.now(),
@@ -2566,19 +2576,18 @@ html, body {
                                  window.location.hostname.includes('welcomeriteshguru.in') ||
                                  (window.location.protocol === 'https:' && !window.location.port);
 
-            let savedRemotely = false;
             if (!isStaticHost) {
                 try {
-                    const res = await fetch('/api/upload', {
+                    fetch('/api/upload', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(itemRecord)
                     });
-                    if (res.ok) savedRemotely = true;
                 } catch (e) {}
             }
 
-            if (!savedRemotely) {
+            const exists = this.items.find(i => i.id === itemRecord.id);
+            if (!exists) {
                 this.items.unshift(itemRecord);
                 this.saveVaultToLocalStorage();
             }
@@ -2588,7 +2597,7 @@ html, body {
             sound.playUpload();
             if (titleInput) titleInput.value = '';
             if (contentInput) contentInput.value = '';
-            showToast('Snippet saved & broadcasted!', 'success');
+            showToast(`Snippet (${category.toUpperCase()}) saved & broadcasted!`, 'success');
             this.renderVaultGrid();
             this.renderRecentStrip();
             this.updateStorageAnalytics();
