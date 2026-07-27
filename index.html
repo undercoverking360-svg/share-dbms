@@ -2779,12 +2779,12 @@ html, body {
                 body.innerHTML = `<div style="text-align:center;"><video controls autoplay class="modal-preview-video" style="max-width:100%; max-height:440px; border-radius:12px; box-shadow: 0 0 25px rgba(127,0,255,0.4);"><source src="${contentUrl}">Your browser does not support playing this video.</video></div>`;
             } else if (isAud && contentUrl) {
                 body.innerHTML = `<div style="padding: 35px 20px; text-align: center; background: rgba(0,242,254,0.05); border-radius: 16px; border: 1px solid rgba(0,242,254,0.2);"><div class="large-icon" style="font-size: 3.8rem; margin-bottom: 15px; color: var(--primary-cyan);">🎵</div><p style="font-weight:700; font-size:1.1rem; color:#fff; margin-bottom:15px;">${this.escapeHTML(item.name)}</p><audio controls autoplay src="${contentUrl}" style="width: 100%; max-width: 480px; outline: none;"></audio></div>`;
-            } else if (isPdf && contentUrl) {
-                let pdfUrl = contentUrl;
-                if (contentUrl.startsWith('data:application/pdf')) {
+            } else if (isPdf) {
+                let pdfUrl = item.content;
+                if (item.content && item.content.startsWith('data:')) {
                     try {
-                        const arr = contentUrl.split(',');
-                        const bstr = atob(arr[1]);
+                        const parts = item.content.split(',');
+                        const bstr = atob(parts[1]);
                         let n = bstr.length;
                         const u8arr = new Uint8Array(n);
                         while (n--) {
@@ -2793,17 +2793,28 @@ html, body {
                         const blob = new Blob([u8arr], { type: 'application/pdf' });
                         pdfUrl = URL.createObjectURL(blob);
                     } catch(e) {}
+                } else if (!pdfUrl || (!pdfUrl.startsWith('blob:') && !pdfUrl.startsWith('data:'))) {
+                    pdfUrl = item.downloadUrl || (this.activeLocalServerUrl ? `${this.activeLocalServerUrl}/api/download/${item.id}` : '');
                 }
-                body.innerHTML = `
-                    <div style="text-align: center; padding: 10px; background: rgba(8,12,24,0.95); border-radius: 14px; border: 1px solid var(--border-glass);">
-                        <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:12px;">
-                            <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding: 8px 20px; text-decoration:none; font-weight:700; font-size:0.9rem; border-radius:24px; box-shadow: 0 0 20px rgba(0,242,254,0.5);">
-                                📖 Open PDF Reader (Full Screen)
-                            </a>
+
+                if (pdfUrl) {
+                    body.innerHTML = `
+                        <div style="text-align: center; padding: 10px; background: rgba(8,12,24,0.95); border-radius: 14px; border: 1px solid var(--border-glass);">
+                            <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:12px;">
+                                <a href="${pdfUrl}" target="_blank" download="${this.escapeHTML(item.name || 'document.pdf')}" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding: 8px 20px; text-decoration:none; font-weight:700; font-size:0.9rem; border-radius:24px; box-shadow: 0 0 20px rgba(0,242,254,0.5);">
+                                    📖 Open PDF Reader (Full Screen)
+                                </a>
+                            </div>
+                            <iframe src="${pdfUrl}" style="width: 100%; height: 440px; border: none; border-radius: 12px; background: #ffffff;"></iframe>
                         </div>
-                        <iframe src="${pdfUrl}#toolbar=1&navpanes=0" style="width: 100%; height: 440px; border: none; border-radius: 12px; background: #ffffff;"></iframe>
-                    </div>
-                `;
+                    `;
+                } else {
+                    body.innerHTML = `<div class="empty-state" style="padding: 30px;">
+                        <div class="empty-icon" style="font-size: 3.5rem; margin-bottom: 10px;">📄</div>
+                        <p style="font-size: 1.1rem; font-weight: 700; color: #fff;">${this.escapeHTML(item.name)}</p>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 6px;">Click Download File below to view PDF.</p>
+                    </div>`;
+                }
             } else if (isTxt) {
                 let textContent = item.content;
                 if (textContent && textContent.startsWith('data:')) {
@@ -3087,7 +3098,7 @@ html, body {
             }
         }
 
-        // --- BACKUP EXPORT & IMPORT (FULL MEDIA INCLUDED) ---
+        // --- BACKUP EXPORT & IMPORT (FULL 35MB+ MEDIA INCLUDED) ---
         async exportVaultBackup() {
             sound.playClick();
             if (this.items.length === 0) {
@@ -3095,27 +3106,41 @@ html, body {
                 return;
             }
 
-            showToast('Preparing Full-Media Backup...', 'sync');
+            showToast('📦 Packaging Full Media Backup...', 'sync');
 
             const fullItems = [];
-            for (const item of this.items) {
+            const baseUrl = this.activeLocalServerUrl || window.location.origin;
+
+            for (let i = 0; i < this.items.length; i++) {
+                const item = this.items[i];
                 let fullContent = item.content;
-                if (!fullContent && this.activeLocalServerUrl) {
+
+                if (!fullContent || (!fullContent.startsWith('data:') && !item.isSnippet)) {
                     try {
-                        const res = await fetch(`${this.activeLocalServerUrl}/api/download/${item.id}`);
+                        const downloadUrl = `${baseUrl}/api/download/${item.id}`;
+                        const res = await fetch(downloadUrl);
                         if (res.ok) {
                             const blob = await res.blob();
-                            fullContent = await new Promise(r => {
-                                const rd = new FileReader();
-                                rd.onload = () => r(rd.result);
-                                rd.readAsDataURL(blob);
+                            fullContent = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
                             });
                         }
-                    } catch(e) {}
+                    } catch(e) {
+                        console.error('Failed to fetch media binary for:', item.id, e);
+                    }
                 }
+
                 fullItems.push({
-                    ...item,
-                    content: fullContent || item.content
+                    id: item.id,
+                    name: item.name,
+                    size: item.size,
+                    mimeType: item.mimeType,
+                    category: item.category,
+                    timestamp: item.timestamp,
+                    isSnippet: item.isSnippet || false,
+                    content: fullContent || item.content || ''
                 });
             }
 
@@ -3128,7 +3153,7 @@ html, body {
                 items: fullItems
             };
 
-            const jsonStr = JSON.stringify(exportObj, null, 2);
+            const jsonStr = JSON.stringify(exportObj);
             const blob = new Blob([jsonStr], { type: 'application/json' });
             const blobUrl = URL.createObjectURL(blob);
 
@@ -3137,12 +3162,13 @@ html, body {
             downloadAnchor.download = `VaultPulse_FullMedia_Backup_${new Date().toISOString().slice(0,10)}.json`;
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
+
             setTimeout(() => {
                 document.body.removeChild(downloadAnchor);
                 URL.revokeObjectURL(blobUrl);
-            }, 300);
+            }, 500);
 
-            showToast(`📦 Exported Full-Media Backup (${fullItems.length} items with complete media)!`, 'success');
+            showToast(`🎉 Exported Full-Media Backup (${this.formatBytes(blob.size)})!`, 'success');
         }
 
         async importVaultBackup(event) {
