@@ -2583,6 +2583,8 @@ html, body {
                 this.saveVaultToLocalStorage();
             }
 
+            this.broadcastNewItem(itemRecord);
+
             sound.playUpload();
             if (titleInput) titleInput.value = '';
             if (contentInput) contentInput.value = '';
@@ -2787,9 +2789,12 @@ html, body {
                             <button id="pdf-prev-btn" class="btn btn-secondary" style="padding:4px 12px; font-size:0.8rem;">◀ Prev Page</button>
                             <span id="pdf-page-indicator" style="color:#00f2fe; font-weight:700; font-size:0.85rem;">Loading PDF Pages...</span>
                             <button id="pdf-next-btn" class="btn btn-secondary" style="padding:4px 12px; font-size:0.8rem;">Next Page ▶</button>
+                            <button onclick="const c = document.getElementById('pdf-render-canvas'); if (c.requestFullscreen) { c.requestFullscreen(); } else if (c.webkitRequestFullscreen) { c.webkitRequestFullscreen(); }" class="btn btn-primary" style="padding:4px 14px; font-size:0.8rem; cursor:pointer;">
+                                ⛶ Fullscreen Maximize
+                            </button>
                         </div>
                         <div style="max-height: 420px; overflow: auto; background: #121826; border-radius: 10px; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 250px;">
-                            <canvas id="pdf-render-canvas" style="max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: block; margin: 0 auto;"></canvas>
+                            <canvas id="pdf-render-canvas" style="max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: block; margin: 0 auto; cursor: pointer;" onclick="if (this.requestFullscreen) { this.requestFullscreen(); } else if (this.webkitRequestFullscreen) { this.webkitRequestFullscreen(); }"></canvas>
                         </div>
                     </div>
                 `;
