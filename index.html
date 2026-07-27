@@ -2751,13 +2751,12 @@ html, body {
             if (qrBtn) qrBtn.style.display = 'none'; // Hide Phone QR inside preview modal per user request
             if (downloadBtn) downloadBtn.onclick = () => this.downloadItem(item);
 
-            let viewUrl = item.content;
-            if (this.activeLocalServerUrl) {
-                viewUrl = `${this.activeLocalServerUrl}/api/view/${item.id}`;
-            } else if (!viewUrl && item.downloadUrl) {
-                viewUrl = item.downloadUrl.replace('/api/download/', '/api/view/');
+            let contentUrl = item.content;
+            if (!contentUrl && this.activeLocalServerUrl) {
+                contentUrl = `${this.activeLocalServerUrl}/api/download/${item.id}`;
+            } else if (!contentUrl && item.downloadUrl) {
+                contentUrl = item.downloadUrl;
             }
-            const contentUrl = viewUrl || item.downloadUrl || item.content;
 
             const nameLower = (item.name || '').toLowerCase();
             const mime = (item.mimeType || '').toLowerCase();
