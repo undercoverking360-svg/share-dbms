@@ -2769,11 +2769,11 @@ html, body {
 
             if (isImg && contentUrl) {
                 body.innerHTML = `
-                    <div style="text-align:center; position:relative; overflow:auto; max-height:450px; padding:10px;">
-                        <button onclick="const img = this.parentElement.querySelector('img'); img.classList.toggle('zoomed-img');" class="btn btn-secondary" style="position:absolute; top:15px; right:15px; z-index:10; font-size:0.78rem; padding:6px 12px; background:rgba(8,12,24,0.85); border-radius:20px; box-shadow:0 0 10px rgba(0,242,254,0.4);">
-                            🔍 Zoom / Pinch Image
+                    <div style="text-align:center; position:relative; padding:10px;">
+                        <button onclick="const img = this.parentElement.querySelector('img'); if (img.requestFullscreen) { img.requestFullscreen(); } else if (img.webkitRequestFullscreen) { img.webkitRequestFullscreen(); }" class="btn btn-secondary" style="position:absolute; top:15px; right:15px; z-index:10; font-size:0.8rem; padding:6px 14px; background:rgba(8,12,24,0.85); border-radius:20px; box-shadow:0 0 12px rgba(0,242,254,0.4); border:1px solid rgba(0,242,254,0.3); color:#fff; cursor:pointer;">
+                            ⛶ Fullscreen Maximize
                         </button>
-                        <img src="${contentUrl}" class="modal-preview-img" style="max-height: 420px; max-width: 100%; border-radius: 12px; box-shadow: 0 0 25px rgba(0,242,254,0.35); object-fit: contain; cursor: zoom-in; transition: transform 0.3s ease;" alt="preview" onclick="this.classList.toggle('zoomed-img')">
+                        <img src="${contentUrl}" class="modal-preview-img" style="max-height: 440px; max-width: 100%; border-radius: 12px; box-shadow: 0 0 25px rgba(0,242,254,0.35); object-fit: contain; cursor: pointer;" alt="preview" onclick="if (this.requestFullscreen) { this.requestFullscreen(); } else if (this.webkitRequestFullscreen) { this.webkitRequestFullscreen(); }">
                     </div>
                 `;
             } else if (isVid && contentUrl) {
