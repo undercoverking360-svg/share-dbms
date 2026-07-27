@@ -209,8 +209,9 @@ html, body {
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
 }
 
 /* Sync Badge */
@@ -2748,10 +2749,13 @@ html, body {
             if (qrBtn) qrBtn.style.display = 'none'; // Hide Phone QR inside preview modal per user request
             if (downloadBtn) downloadBtn.onclick = () => this.downloadItem(item);
 
-            let contentUrl = item.downloadUrl || item.content;
-            if (!contentUrl && this.activeLocalServerUrl) {
-                contentUrl = `${this.activeLocalServerUrl}/api/download/${item.id}`;
+            let viewUrl = item.content;
+            if (this.activeLocalServerUrl) {
+                viewUrl = `${this.activeLocalServerUrl}/api/view/${item.id}`;
+            } else if (!viewUrl && item.downloadUrl) {
+                viewUrl = item.downloadUrl.replace('/api/download/', '/api/view/');
             }
+            const contentUrl = viewUrl || item.downloadUrl || item.content;
 
             const nameLower = (item.name || '').toLowerCase();
             const mime = (item.mimeType || '').toLowerCase();
@@ -2763,21 +2767,61 @@ html, body {
             const isTxt = item.isSnippet || mime.includes('text') || mime.includes('json') || mime.includes('xml') || mime.includes('javascript') || mime.includes('html') || nameLower.match(/\.(txt|md|js|json|xml|html|css|py|cpp|c|java|cs|ts|php|sh)$/);
 
             if (isImg && contentUrl) {
-                body.innerHTML = `<div style="text-align:center;"><img src="${contentUrl}" class="modal-preview-img" style="max-height: 440px; max-width: 100%; border-radius: 12px; box-shadow: 0 0 25px rgba(0,242,254,0.35); object-fit: contain;" alt="preview"></div>`;
+                body.innerHTML = `
+                    <div style="text-align:center; position:relative; overflow:auto; max-height:450px; padding:10px;">
+                        <button onclick="const img = this.parentElement.querySelector('img'); img.classList.toggle('zoomed-img');" class="btn btn-secondary" style="position:absolute; top:15px; right:15px; z-index:10; font-size:0.78rem; padding:6px 12px; background:rgba(8,12,24,0.85); border-radius:20px; box-shadow:0 0 10px rgba(0,242,254,0.4);">
+                            🔍 Zoom / Pinch Image
+                        </button>
+                        <img src="${contentUrl}" class="modal-preview-img" style="max-height: 420px; max-width: 100%; border-radius: 12px; box-shadow: 0 0 25px rgba(0,242,254,0.35); object-fit: contain; cursor: zoom-in; transition: transform 0.3s ease;" alt="preview" onclick="this.classList.toggle('zoomed-img')">
+                    </div>
+                `;
             } else if (isVid && contentUrl) {
                 body.innerHTML = `<div style="text-align:center;"><video controls autoplay class="modal-preview-video" style="max-width:100%; max-height:440px; border-radius:12px; box-shadow: 0 0 25px rgba(127,0,255,0.4);"><source src="${contentUrl}">Your browser does not support playing this video.</video></div>`;
             } else if (isAud && contentUrl) {
                 body.innerHTML = `<div style="padding: 35px 20px; text-align: center; background: rgba(0,242,254,0.05); border-radius: 16px; border: 1px solid rgba(0,242,254,0.2);"><div class="large-icon" style="font-size: 3.8rem; margin-bottom: 15px; color: var(--primary-cyan);">🎵</div><p style="font-weight:700; font-size:1.1rem; color:#fff; margin-bottom:15px;">${this.escapeHTML(item.name)}</p><audio controls autoplay src="${contentUrl}" style="width: 100%; max-width: 480px; outline: none;"></audio></div>`;
             } else if (isPdf && contentUrl) {
-                body.innerHTML = `<iframe src="${contentUrl}" style="width: 100%; height: 480px; border: none; border-radius: 12px; background: #fff;"></iframe>`;
-            } else if (isTxt && item.content) {
+                let pdfUrl = contentUrl;
+                if (contentUrl.startsWith('data:application/pdf')) {
+                    try {
+                        const arr = contentUrl.split(',');
+                        const bstr = atob(arr[1]);
+                        let n = bstr.length;
+                        const u8arr = new Uint8Array(n);
+                        while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n);
+                        }
+                        const blob = new Blob([u8arr], { type: 'application/pdf' });
+                        pdfUrl = URL.createObjectURL(blob);
+                    } catch(e) {}
+                }
+                body.innerHTML = `
+                    <div style="text-align: center; padding: 10px; background: rgba(8,12,24,0.95); border-radius: 14px; border: 1px solid var(--border-glass);">
+                        <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:12px;">
+                            <a href="${pdfUrl}" target="_blank" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding: 8px 20px; text-decoration:none; font-weight:700; font-size:0.9rem; border-radius:24px; box-shadow: 0 0 20px rgba(0,242,254,0.5);">
+                                📖 Open PDF Reader (Full Screen)
+                            </a>
+                        </div>
+                        <iframe src="${pdfUrl}#toolbar=1&navpanes=0" style="width: 100%; height: 440px; border: none; border-radius: 12px; background: #ffffff;"></iframe>
+                    </div>
+                `;
+            } else if (isTxt) {
                 let textContent = item.content;
-                if (textContent.startsWith('data:')) {
+                if (textContent && textContent.startsWith('data:')) {
                     try {
                         textContent = atob(textContent.split(',')[1]);
                     } catch(e) {}
+                    body.innerHTML = `<pre class="modal-preview-text" style="max-height: 420px; overflow: auto; background: rgba(8,12,24,0.95); padding: 18px; border-radius: 12px; border: 1px solid var(--border-glass); text-align: left; font-family: var(--font-mono); font-size: 0.9rem; color: #00f2fe; white-space: pre-wrap; word-break: break-all;"><code>${this.escapeHTML(textContent)}</code></pre>`;
+                } else if (contentUrl) {
+                    body.innerHTML = `<div style="text-align:center; padding: 30px; color: var(--primary-cyan);"><span class="pulse-dot"></span> Loading text preview...</div>`;
+                    fetch(contentUrl).then(res => res.text()).then(txt => {
+                        body.innerHTML = `<pre class="modal-preview-text" style="max-height: 420px; overflow: auto; background: rgba(8,12,24,0.95); padding: 18px; border-radius: 12px; border: 1px solid var(--border-glass); text-align: left; font-family: var(--font-mono); font-size: 0.9rem; color: #00f2fe; white-space: pre-wrap; word-break: break-all;"><code>${this.escapeHTML(txt.substring(0, 100000))}</code></pre>`;
+                    }).catch(() => {
+                        body.innerHTML = `<div class="empty-state" style="padding: 30px;">
+                            <div class="empty-icon" style="font-size: 3.5rem; margin-bottom: 10px;">${this.getCategoryIcon(item.category)}</div>
+                            <p style="font-size: 1.1rem; font-weight: 700; color: #fff;">${this.escapeHTML(item.name)}</p>
+                        </div>`;
+                    });
                 }
-                body.innerHTML = `<pre class="modal-preview-text" style="max-height: 420px; overflow: auto; background: rgba(8,12,24,0.95); padding: 18px; border-radius: 12px; border: 1px solid var(--border-glass); text-align: left; font-family: var(--font-mono); font-size: 0.9rem; color: #00f2fe; white-space: pre-wrap; word-break: break-all;"><code>${this.escapeHTML(textContent)}</code></pre>`;
             } else {
                 body.innerHTML = `<div class="empty-state" style="padding: 30px;">
                     <div class="empty-icon" style="font-size: 3.5rem; margin-bottom: 10px;">${this.getCategoryIcon(item.category)}</div>
@@ -3043,29 +3087,62 @@ html, body {
             }
         }
 
-        // --- BACKUP EXPORT & IMPORT ---
-        exportVaultBackup() {
+        // --- BACKUP EXPORT & IMPORT (FULL MEDIA INCLUDED) ---
+        async exportVaultBackup() {
             sound.playClick();
             if (this.items.length === 0) {
                 showToast('Vault is empty, nothing to export!', 'error');
                 return;
             }
 
+            showToast('Preparing Full-Media Backup...', 'sync');
+
+            const fullItems = [];
+            for (const item of this.items) {
+                let fullContent = item.content;
+                if (!fullContent && this.activeLocalServerUrl) {
+                    try {
+                        const res = await fetch(`${this.activeLocalServerUrl}/api/download/${item.id}`);
+                        if (res.ok) {
+                            const blob = await res.blob();
+                            fullContent = await new Promise(r => {
+                                const rd = new FileReader();
+                                rd.onload = () => r(rd.result);
+                                rd.readAsDataURL(blob);
+                            });
+                        }
+                    } catch(e) {}
+                }
+                fullItems.push({
+                    ...item,
+                    content: fullContent || item.content
+                });
+            }
+
             const exportObj = {
-                version: 'VaultPulse_v1.5',
+                app: 'VaultPulse',
+                version: 'v10.0',
+                backupType: 'FULL_MEDIA_BACKUP',
                 exportedAt: new Date().toISOString(),
-                items: this.items
+                totalItems: fullItems.length,
+                items: fullItems
             };
 
-            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const jsonStr = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const blobUrl = URL.createObjectURL(blob);
+
             const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute('href', dataStr);
-            downloadAnchor.setAttribute('download', `VaultPulse_Backup_${Date.now()}.json`);
+            downloadAnchor.href = blobUrl;
+            downloadAnchor.download = `VaultPulse_FullMedia_Backup_${new Date().toISOString().slice(0,10)}.json`;
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
-            downloadAnchor.remove();
+            setTimeout(() => {
+                document.body.removeChild(downloadAnchor);
+                URL.revokeObjectURL(blobUrl);
+            }, 300);
 
-            showToast('Exported vault backup (.json)', 'success');
+            showToast(`📦 Exported Full-Media Backup (${fullItems.length} items with complete media)!`, 'success');
         }
 
         async importVaultBackup(event) {
@@ -3073,20 +3150,33 @@ html, body {
             if (!file) return;
 
             sound.playClick();
+            showToast('Reading Full-Media Backup file...', 'sync');
+
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const parsed = JSON.parse(e.target.result);
                     if (parsed.items && Array.isArray(parsed.items)) {
+                        let count = 0;
                         for (const item of parsed.items) {
-                            await fetch('/api/upload', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(item)
-                            });
+                            const exists = this.items.find(i => i.id === item.id);
+                            if (!exists) {
+                                this.items.unshift(item);
+                                count++;
+                                try {
+                                    fetch('/api/upload', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(item)
+                                    });
+                                } catch(e) {}
+                            }
                         }
-                        showToast(`Restored ${parsed.items.length} items to vault!`, 'success');
-                        await this.refreshVaultData();
+                        this.saveVaultToLocalStorage();
+                        this.renderVaultGrid();
+                        this.renderRecentStrip();
+                        this.updateStorageAnalytics();
+                        showToast(`🎉 Full-Media Backup Restored! (${count} new items with full media loaded)`, 'success');
                     } else {
                         showToast('Invalid backup file format.', 'error');
                     }
