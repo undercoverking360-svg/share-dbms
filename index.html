@@ -2971,40 +2971,31 @@ html, body {
             titleEl.textContent = '📱 Smartphone Connect QR';
             hintEl.textContent = 'Scan with smartphone camera to connect mobile directly over Wi-Fi!';
 
-            let connectUrl = (this.networkUrl && !this.networkUrl.includes('localhost') && !this.networkUrl.includes('127.0.0.1')) 
+            let connectUrl = (this.networkUrl && !this.networkUrl.includes('localhost')) 
                 ? this.networkUrl 
-                : `${window.location.origin}`;
+                : (this.localIP ? `http://${this.localIP}:3000` : `${window.location.origin}`);
 
             qrContainer.innerHTML = generateSVGQRCode(connectUrl);
             qrText.value = connectUrl;
 
             copyBtn.textContent = 'Copy Connect URL';
             copyBtn.onclick = () => {
-                navigator.clipboard.writeText(connectUrl);
+                navigator.clipboard.writeText(qrText.value);
                 sound.playClick();
                 showToast('Connect URL copied to clipboard!', 'success');
             };
 
-            // Open modal INSTANTLY (0ms delay)
             document.getElementById('qr-modal').classList.remove('hidden');
 
-            // Asynchronously check local server IP in background (non-blocking)
-            setTimeout(async () => {
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 600);
-                    const res = await fetch('http://localhost:3000/api/info', { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    if (res.ok) {
-                        const info = await res.json();
-                        if (info.networkUrl) {
-                            connectUrl = info.networkUrl;
-                            qrContainer.innerHTML = generateSVGQRCode(connectUrl);
-                            qrText.value = connectUrl;
-                        }
-                    }
-                } catch(e) {}
-            }, 50);
+            // Probe local server IP in background and update QR immediately
+            fetch('http://localhost:3000/api/info').then(res => res.json()).then(info => {
+                if (info && info.networkUrl) {
+                    this.networkUrl = info.networkUrl;
+                    this.localIP = info.localIP;
+                    qrContainer.innerHTML = generateSVGQRCode(info.networkUrl);
+                    qrText.value = info.networkUrl;
+                }
+            }).catch(() => {});
         }
 
         checkHashNavigation() {
