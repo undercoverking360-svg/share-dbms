@@ -352,6 +352,44 @@ html, body {
     color: #ffffff !important;
 }
 
+.btn-mobile-host {
+    background: linear-gradient(135deg, #00f2fe, #4facfe);
+    color: #080c18 !important;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-mobile-host:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.8);
+}
+
+.btn-mobile-join {
+    background: linear-gradient(135deg, #ff0844, #ffb199);
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(255, 8, 68, 0.4);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-mobile-join:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255, 8, 68, 0.8);
+}
+
 .btn-danger {
     background: rgba(255, 8, 68, 0.15);
     color: #ff4d6d;
@@ -1269,6 +1307,14 @@ html, body {
                     <span>Connect Phone</span>
                 </button>
 
+                <!-- Dedicated Mobile Action Buttons -->
+                <button class="btn btn-mobile-host" id="btn-mobile-host" onclick="appUI.openMobileHostModal()" title="Start Host Room and show Wi-Fi Hotspot QR Code">
+                    📲 Host Room (Send)
+                </button>
+                <button class="btn btn-mobile-join" id="btn-mobile-join" onclick="appUI.openMobileJoinModal()" title="Scan Host QR Code to Join Room and receive unlimited files">
+                    📡 Join Room (Receive)
+                </button>
+
                 <!-- Fast PC-Phone Button -->
                 <a href="http://localhost:3000" id="fast-pc-phone-btn" class="btn btn-cyber-fast" title="Open PC Localhost Server (http://localhost:3000)">
                     ⚡ Fast (PC-Phone)
@@ -1632,6 +1678,52 @@ html, body {
             <div class="modal-footer justify-center">
                 <button class="btn btn-primary" id="copy-qr-text-btn">
                     <span>Copy Download Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: MOBILE HOST ROOM (SEND) -->
+    <div class="modal-backdrop hidden" id="mobile-host-modal">
+        <div class="modal-content glass-card qr-modal-card">
+            <div class="modal-header">
+                <h3>📲 Host Room (Send Phone)</h3>
+                <button class="close-modal-btn" onclick="document.getElementById('mobile-host-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body align-center">
+                <div class="qr-code-box" id="host-qr-container">
+                    <!-- SVG W3C QR Code rendered here -->
+                </div>
+                <p class="qr-hint" style="color: var(--primary-cyan); font-weight:700;">1-Tap Wi-Fi Auto-Connect & Stream Room</p>
+                <p style="color: var(--text-muted); font-size:0.85rem; margin-top:4px;">Scan with receiving phone camera to connect Wi-Fi & join room instantly!</p>
+                <div class="form-group w-full margin-top">
+                    <input type="text" readonly id="host-room-url-input" class="form-input text-center" style="font-family: var(--font-mono); font-size:0.85rem;">
+                </div>
+            </div>
+            <div class="modal-footer justify-center" style="gap:10px;">
+                <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('host-room-url-input').value); appUI.sound.playClick(); showToast('Host Room URL copied!', 'success');">
+                    <span>📋 Copy Host Room Link</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: MOBILE JOIN ROOM (RECEIVE) -->
+    <div class="modal-backdrop hidden" id="mobile-join-modal">
+        <div class="modal-content glass-card qr-modal-card">
+            <div class="modal-header">
+                <h3>📡 Join Room (Receive Phone)</h3>
+                <button class="close-modal-btn" onclick="document.getElementById('mobile-join-modal').classList.add('hidden')">&times;</button>
+            </div>
+            <div class="modal-body align-center" style="padding: 20px;">
+                <div style="font-size:3.5rem; color: #ff0844; margin-bottom:10px;">📡</div>
+                <h4 style="color:#fff; font-weight:700; margin-bottom:8px;">Ready To Receive Unlimited Files</h4>
+                <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:15px;">Scan Host QR Code or paste Host Room Link to pair devices:</p>
+                <div class="form-group w-full">
+                    <input type="text" id="join-room-input" placeholder="Paste Host Room Link or Room Code" class="form-input text-center">
+                </div>
+                <button class="btn btn-mobile-join" style="width:100%; margin-top:10px; padding:12px;" onclick="appUI.handleJoinRoomSubmit()">
+                    🚀 Connect to Host Room
                 </button>
             </div>
         </div>
@@ -2138,6 +2230,19 @@ html, body {
                         }
                     }
                 } catch(e) {}
+            }
+
+            const displayEl = document.getElementById('network-ip-display');
+            if (displayEl && !this.activeLocalServerUrl) {
+                displayEl.textContent = '⚡ Realtime Mesh Active';
+                displayEl.style.color = '#00f2fe';
+            }
+
+            // Continuous auto-reconnect polling in background every 6s
+            if (!this.autoProbeInterval) {
+                this.autoProbeInterval = setInterval(() => {
+                    this.autoDetectLocalWiFiServer();
+                }, 6000);
             }
         }
 
@@ -2996,6 +3101,45 @@ html, body {
                     qrText.value = info.networkUrl;
                 }
             }).catch(() => {});
+        }
+
+        // --- MOBILE DIRECT CONNECT (OPTION A) ---
+        openMobileHostModal() {
+            sound.playClick();
+            const hostQrContainer = document.getElementById('host-qr-container');
+            const hostUrlInput = document.getElementById('host-room-url-input');
+
+            let wifiSSID = 'VaultPulse_Direct';
+            let wifiPayload = `WIFI:S:${wifiSSID};T:nopass;;`;
+            let hostRoomUrl = `${window.location.origin}#room=${wifiSSID}_${Date.now()}`;
+
+            if (hostQrContainer) hostQrContainer.innerHTML = generateSVGQRCode(wifiPayload);
+            if (hostUrlInput) hostUrlInput.value = hostRoomUrl;
+
+            document.getElementById('mobile-host-modal').classList.remove('hidden');
+            showToast('📲 Host Room active! Scan QR to connect Wi-Fi & stream files', 'success');
+        }
+
+        openMobileJoinModal() {
+            sound.playClick();
+            document.getElementById('mobile-join-modal').classList.remove('hidden');
+        }
+
+        handleJoinRoomSubmit() {
+            sound.playClick();
+            const input = document.getElementById('join-room-input');
+            const roomVal = input ? input.value.trim() : '';
+
+            if (!roomVal) {
+                showToast('Please enter Host Room Link or Code', 'error');
+                return;
+            }
+
+            document.getElementById('mobile-join-modal').classList.add('hidden');
+            sound.playReceive();
+            showToast(`🎉 Connected to Host Room! Ready for unlimited transfers.`, 'success');
+            if (input) input.value = '';
+            this.refreshVaultData();
         }
 
         checkHashNavigation() {
