@@ -149,35 +149,41 @@ html, body {
 /* Header Styling */
 .app-header {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 20px;
+    padding: 12px 18px;
     gap: 8px;
     overflow: visible;
 }
 
-@media (max-width: 1100px) {
-    .app-header { gap: 6px; }
-    #fast-pc-phone-btn { display: none !important; }
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
-@media (max-width: 900px) {
+.header-controls .btn {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
     .app-header {
-        flex-wrap: wrap;
         padding: 10px 14px;
+        gap: 6px;
     }
     .brand-text .tagline { display: none; }
-    .brand-text h1 { font-size: 1.1rem; }
-    .btn-mobile-host, .btn-mobile-join { font-size: 0.75rem; padding: 6px 10px; }
-    .sync-badge { font-size: 0.72rem; padding: 5px 10px; }
+    .brand-text h1 { font-size: 1.15rem; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     #phone-connect-btn span { display: none; }
-    .btn-mobile-host { font-size: 0.72rem; padding: 6px 8px; }
-    .btn-mobile-join { font-size: 0.72rem; padding: 6px 8px; }
     .sync-badge .sync-text { display: none; }
+    .header-controls .btn { padding: 5px 9px; font-size: 0.76rem; }
 }
 
 .brand {
@@ -1320,32 +1326,31 @@ html, body {
                         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
                         <line x1="12" y1="18" x2="12.01" y2="18"></line>
                     </svg>
-                    <span>Connect Phone</span>
+                    <span>Connect</span>
                 </button>
 
                 <!-- Dedicated Mobile Action Buttons -->
                 <button class="btn btn-mobile-host" id="btn-mobile-host" onclick="appUI.openMobileHostModal()" title="Start Host Room and show Wi-Fi Hotspot QR Code">
-                    📲 Host Room (Send)
+                    📲 Host
                 </button>
                 <button class="btn btn-mobile-join" id="btn-mobile-join" onclick="appUI.openMobileJoinModal()" title="Scan Host QR Code to Join Room and receive unlimited files">
-                    📡 Join Room (Receive)
+                    📡 Join
                 </button>
 
                 <!-- Smart Local Server Launcher (Only shown on localhost/owner PC) -->
                 <button id="local-server-btn" class="btn btn-cyber-fast hidden" onclick="appUI.smartLaunchLocalServer()" title="Auto-detect or launch local Wi-Fi server">
-                    <span id="local-server-btn-text">⚡ Start Local Server</span>
+                    <span id="local-server-btn-text">⚡ Server</span>
                 </button>
 
                 <!-- Manual & Setup Guide Button -->
                 <button class="btn btn-secondary" onclick="appUI.openManualGuideModal()" title="View User Manual and Desktop Setup Guide">
-                    📖 Manual Guide
+                    📖 Guide
                 </button>
-
 
                 <!-- Live Network Badge -->
                 <div class="sync-badge" id="sync-status-badge" title="Real-time Wi-Fi sync active">
                     <span class="pulse-dot"></span>
-                    <span class="sync-text" id="network-ip-display">Wi-Fi Sync Live</span>
+                    <span class="sync-text" id="network-ip-display">Sync Live</span>
                 </div>
 
                 <!-- Mute / Sound Toggle -->
@@ -1366,7 +1371,7 @@ html, body {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>Drop & Share</span>
+                    <span>+ Share</span>
                 </button>
             </div>
         </header>
@@ -1764,8 +1769,8 @@ html, body {
                 <div style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(127, 0, 255, 0.2)); border: 1px solid var(--primary-cyan); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center;">
                     <h4 style="color: #00f2fe; font-size: 1.1rem; margin-bottom: 6px;">💻 Download VaultPulse Windows Desktop App</h4>
                     <p style="color: rgba(255,255,255,0.8); font-size: 0.82rem; margin-bottom: 12px;">Zero Setup • 1-Click Wi-Fi Direct High Speed Server for PC & Mobile</p>
-                    <a href="https://drive.google.com/uc?export=download&id=YOUR_DRIVE_FILE_ID" id="desktop-app-download-link" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 700; text-decoration: none;">
-                        <span>🚀 Download VaultPulse-Desktop-v1.0.0.zip (105 MB)</span>
+                    <a href="https://mega.nz/file/vLQnmJBY#EVlgO7cAmFqLWLiI-GXT7Ek-WwCcoJig2K68yykqZe0" id="desktop-app-download-link" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 700; text-decoration: none;">
+                        <span>🚀 Download VaultPulse-Desktop-v1.0.0.zip (Mega.nz)</span>
                     </a>
                 </div>
 
