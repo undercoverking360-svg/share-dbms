@@ -1347,8 +1347,13 @@ html, body {
                     ⚡ Localhost
                 </a>
 
+                <!-- 1-Click Local Server Shutdown Button (Shown when server is running) -->
+                <button id="kill-server-btn" class="btn btn-secondary hidden" style="background: rgba(255, 68, 68, 0.15); border-color: rgba(255, 68, 68, 0.4); color: #ff4444;" onclick="appUI.stopLocalServer()" title="1-Click Stop Local Server (Port 3000)">
+                    🛑 Kill Server
+                </button>
+
                 <!-- Manual & Setup Guide Button -->
-                <button class="btn btn-secondary" onclick="appUI.openManualGuideModal()" title="View User Manual and Desktop Setup Guide">
+                <button class="btn btn-secondary" id="btn-manual-guide" onclick="appUI.openManualGuideModal()" title="View User Manual and Desktop Setup Guide">
                     📖 Guide
                 </button>
 
@@ -1774,8 +1779,8 @@ html, body {
                 <div style="background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(127, 0, 255, 0.2)); border: 1px solid var(--primary-cyan); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: center;">
                     <h4 style="color: #00f2fe; font-size: 1.1rem; margin-bottom: 6px;">💻 Download VaultPulse Windows Desktop App</h4>
                     <p style="color: rgba(255,255,255,0.8); font-size: 0.82rem; margin-bottom: 12px;">Zero Setup • 1-Click Wi-Fi Direct High Speed Server for PC & Mobile</p>
-                    <a href="https://drive.google.com/uc?export=download&id=1EuxPuQNgO5OxdXSIPmP4vlWnV6z1fbHA" id="desktop-app-download-link" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; font-weight: 700; text-decoration: none; max-width: 100%; box-sizing: border-box; white-space: normal; text-align: center; font-size: 0.82rem; word-break: break-word;">
-                        <span>🚀 Download VaultPulse-Desktop-v1.0.0.zip (105 MB)</span>
+                    <a href="https://archive.org/download/vault-pulse-desktop-v-1.0.0/VaultPulse-Desktop-v1.0.0.zip" id="desktop-app-download-link" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; font-weight: 700; text-decoration: none; max-width: 100%; box-sizing: border-box; white-space: normal; text-align: center; font-size: 0.82rem; word-break: break-word;">
+                        <span>🚀 Download VaultPulse-Desktop-v1.0.0.zip (Archive.org)</span>
                     </a>
                 </div>
 
@@ -2097,26 +2102,30 @@ html, body {
                                 /^192\.168\./.test(window.location.hostname) ||
                                 /^10\./.test(window.location.hostname);
 
-            const btn = document.getElementById('local-server-btn');
-            const btnText = document.getElementById('local-server-btn-text');
+            const killBtn = document.getElementById('kill-server-btn');
 
-            if (isLocalhost && btn) {
-                btn.classList.remove('hidden');
-                // Auto-check server status silently on page load
-                fetch('http://localhost:3000/api/info', { signal: AbortSignal.timeout(800) })
-                    .then(r => r.json())
-                    .then(info => {
-                        if (info && info.localIP) {
-                            this.localIP = info.localIP;
-                            this.networkUrl = info.networkUrl;
-                            if (btnText) btnText.textContent = '⚡ Localhost';
-                            btn.title = `Server Live at http://${info.localIP}:${info.port || 3000}`;
-                            btn.style.background = 'linear-gradient(135deg, #7f00ff, #e100ff)';
-                        }
-                    }).catch(() => {
-                        if (btnText) btnText.textContent = '⚡ Localhost';
-                    });
+            if (isLocalhost) {
+                // On Localhost (Desktop EXE mode): Hide Host, Join, Guide, and Localhost buttons for clean desktop UI
+                const hostBtn = document.getElementById('btn-mobile-host');
+                const joinBtn = document.getElementById('btn-mobile-join');
+                const guideBtn = document.getElementById('btn-manual-guide');
+                const localhostBtn = document.getElementById('fast-pc-phone-btn');
+
+                if (hostBtn) hostBtn.style.display = 'none';
+                if (joinBtn) joinBtn.style.display = 'none';
+                if (guideBtn) guideBtn.style.display = 'none';
+                if (localhostBtn) localhostBtn.style.display = 'none';
             }
+
+            // Probe if PC has local server running — show 🛑 Kill Server button on main site share.welcomeriteshguru.in as well
+            fetch('http://localhost:3000/api/info', { signal: AbortSignal.timeout(800) })
+                .then(r => r.json())
+                .then(info => {
+                    if (info && info.localIP && killBtn) {
+                        killBtn.classList.remove('hidden');
+                        killBtn.style.display = 'inline-flex';
+                    }
+                }).catch(() => {});
         }
 
         initBroadcastChannelSync() {
@@ -3194,12 +3203,12 @@ html, body {
             const titleEl = document.getElementById('qr-modal-title');
             const hintEl = document.getElementById('qr-modal-hint');
 
-            // Default: show cloud URL immediately (universal, always works)
-            const cloudUrl = window.location.origin;
+            // Universal 100% Guaranteed Cloud Sync URL (Always connects mobile smoothly)
+            const connectUrl = window.location.origin;
             titleEl.textContent = '📱 Smartphone Connect QR';
-            hintEl.innerHTML = `<span style="color:#00e676;">☁️ Cloud Mode — Scan to sync via internet (universal)</span>`;
-            qrContainer.innerHTML = generateSVGQRCode(cloudUrl);
-            qrText.value = cloudUrl;
+            hintEl.innerHTML = `<span style="color:#00e676;">☁️ Realtime Cloud Sync — Scan to connect mobile instantly</span>`;
+            qrContainer.innerHTML = generateSVGQRCode(connectUrl);
+            qrText.value = connectUrl;
 
             copyBtn.textContent = 'Copy Connect URL';
             copyBtn.onclick = () => {
@@ -3210,11 +3219,9 @@ html, body {
 
             document.getElementById('qr-modal').classList.remove('hidden');
 
-            // Try to detect local Wi-Fi server — upgrade QR if found
-            const ports = [3000, 3999, 8080];
-            const tryPort = (i) => {
-                if (i >= ports.length) return; // all ports tried, stay in cloud mode
-                fetch(`http://localhost:${ports[i]}/api/info`, { signal: AbortSignal.timeout(800) })
+            // Only probe local IP if user is actively browsing on localhost
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                fetch('http://localhost:3000/api/info', { signal: AbortSignal.timeout(600) })
                     .then(r => r.json())
                     .then(info => {
                         if (info && info.networkUrl && info.localIP) {
@@ -3222,15 +3229,40 @@ html, body {
                             this.localIP = info.localIP;
                             qrContainer.innerHTML = generateSVGQRCode(info.networkUrl);
                             qrText.value = info.networkUrl;
-                            hintEl.innerHTML = `<span style="color:#00f2fe;">⚡ Wi-Fi Direct Mode — Scan to connect at high speed (${info.localIP})</span>`;
+                            hintEl.innerHTML = `<span style="color:#00f2fe;">⚡ Wi-Fi Direct Mode — Scan to connect (${info.localIP})</span>`;
                         }
                     })
-                    .catch(() => tryPort(i + 1));
-            };
-            tryPort(0);
+                    .catch(() => {});
+            }
         }
 
         // --- MOBILE DIRECT CONNECT (OPTION A) ---
+        // --- 1-CLICK LOCAL SERVER SHUTDOWN ---
+        async stopLocalServer() {
+            sound.playClick();
+            showToast('🛑 Stopping local server (port 3000)...', 'sync');
+            try {
+                await fetch('http://localhost:3000/api/kill', { signal: AbortSignal.timeout(1000) });
+            } catch(e) {}
+            
+            setTimeout(() => {
+                showToast('🛑 Local Server stopped! Switched to Cloud Mode.', 'error');
+                const killBtn = document.getElementById('kill-server-btn');
+                if (killBtn) killBtn.style.display = 'none';
+                const displayEl = document.getElementById('network-ip-display');
+                if (displayEl) {
+                    displayEl.textContent = 'Sync Live';
+                    displayEl.style.color = '#00f2fe';
+                }
+
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    setTimeout(() => {
+                        window.location.href = 'https://share.welcomeriteshguru.in';
+                    }, 800);
+                }
+            }, 600);
+        }
+
         // --- SMART LOCAL SERVER LAUNCHER ---
         async smartLaunchLocalServer() {
             const btn = document.getElementById('local-server-btn');
